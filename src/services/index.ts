@@ -241,7 +241,7 @@ const tavilySearch = async (title: string, text: string) => {
     return searchResult;
 };
 
-export const handleAddStep = async (inputValue: string) => {
+export const handleAddStep = async (inputValue: string, type = 1) => {
     if (!inputValue) {
         alert("请输入描述内容");
         return;
@@ -554,14 +554,17 @@ export const handleAddStep = async (inputValue: string) => {
                         jsonData: task14Result.res,
                     };
 
-                    let rt1 = await renderText(task14Result.data, inputValue, 1);
-                    let rt2 = await renderText(task14Result.data, inputValue, 2);
-                    let rt3 = await renderText(task14Result.data, inputValue, 3);
-                    let rt4 = await renderText(task14Result.data, inputValue, 4);
-                    let rt5 = await renderText(task14Result.data, inputValue, 5);
+                    // let rt1 = await renderText(task14Result.data, inputValue, 1);
+                    // let rt2 = await renderText(task14Result.data, inputValue, 2);
+                    // let rt3 = await renderText(task14Result.data, inputValue, 3);
+                    // let rt4 = await renderText(task14Result.data, inputValue, 4);
+                    // let rt5 = await renderText(task14Result.data, inputValue, 5);
+
+                    let rt = await renderText(task14Result.data, inputValue, type);
+
                     ////返回结果
                     return {
-                        result: [rt1, rt2, rt3, rt4, rt5]
+                        result: [rt]
                     }
                 }
             } else {
@@ -596,7 +599,7 @@ export const handleAddStep = async (inputValue: string) => {
     }
 };
 
-export const handleAddStepL = async (inputValue: string) => {
+export const handleAddStepL = async (inputValue: string, type = 1) => {
     if (!inputValue) {
         alert("请输入描述内容");
         return;
@@ -851,14 +854,16 @@ export const handleAddStepL = async (inputValue: string) => {
                         jsonData: task14Result.res,
                     };
 
-                    let rt1 = await renderText(task14Result.data, inputValue, 1);
-                    let rt2 = await renderText(task14Result.data, inputValue, 2);
-                    let rt3 = await renderText(task14Result.data, inputValue, 3);
-                    let rt4 = await renderText(task14Result.data, inputValue, 4);
-                    let rt5 = await renderText(task14Result.data, inputValue, 5);
+                    // let rt1 = await renderText(task14Result.data, inputValue, 1);
+                    // let rt2 = await renderText(task14Result.data, inputValue, 2);
+                    // let rt3 = await renderText(task14Result.data, inputValue, 3);
+                    // let rt4 = await renderText(task14Result.data, inputValue, 4);
+                    // let rt5 = await renderText(task14Result.data, inputValue, 5);
+                    let rt = await renderText(task14Result.data, inputValue, type);
+
                     ////返回结果
                     return {
-                        result: [rt1, rt2, rt3, rt4, rt5]
+                        result: [rt]
                     }
                 }
             } else {

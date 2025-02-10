@@ -4,14 +4,14 @@ import { handleAddStep, handleAddStepL } from '../services/index';
 
 
 export const t = async (ctx: Context) => {
-    const { text }: any = ctx.request.body;
-    const res = await handleAddStep(text);
+    const { text, type }: any = ctx.request.body;
+    const res = await handleAddStep(text, type);
     ctx.body = { message: res };
 };
 
 export const l = async (ctx: Context) => {
-    const { text }: any = ctx.request.body;
-    const res = await handleAddStepL(text);
+    const { text, type }: any = ctx.request.body;
+    const res = await handleAddStepL(text, type);
     ctx.body = { message: res };
 };
 
