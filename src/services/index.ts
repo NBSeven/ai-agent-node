@@ -161,6 +161,7 @@ async function waitForTaskCompletion(
                         }; // 任务成功，返回结果
                     } catch (error) {
                         console.log(fixJsonString(statusResponse.data));
+                        console.log(error)
                         return error;
                     }
                 } else {
