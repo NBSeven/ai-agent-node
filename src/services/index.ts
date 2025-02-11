@@ -154,10 +154,15 @@ async function waitForTaskCompletion(
         if (statusResponse.status === "success") {
             if (typeof statusResponse.data === "string") {
                 if (/^\{.*\}$/.test(fixJsonString(statusResponse.data))) {
-                    return {
-                        data: JSON.parse(fixJsonString(statusResponse.data)),
-                        res: statusResponse,
-                    }; // 任务成功，返回结果
+                    try {
+                        return {
+                            data: JSON.parse(fixJsonString(statusResponse.data)),
+                            res: statusResponse,
+                        }; // 任务成功，返回结果
+                    } catch (error) {
+                        console.log(fixJsonString(statusResponse.data));
+                        return error;
+                    }
                 } else {
                     return {
                         data: statusResponse.data,
@@ -518,7 +523,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                         topic:
                             task2Result.data.selected_topic ||
                             task2Result.data.seleted_topic,
-                        result: task13Result.data,
+                        result: JSON.stringify(task13Result.data),
                     };
                     const task14Id = await startTask("/ai/reply/fact", task14Payload);
                     const task14Result = await waitForTaskCompletion(task14Id);
@@ -845,7 +850,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
                         topic: task8Result.data.topic,
                         text: task1Result.data.topic,
                         model,
-                        search: task13Result.data,
+                        search: JSON.stringify(task13Result.data),
                     };
                     const task14Id = await startTask("/ai/tweet/reply", task14Payload);
                     const task14Result = await waitForTaskCompletion(task14Id);
