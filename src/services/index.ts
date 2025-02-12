@@ -95,12 +95,12 @@ const fixJsonString = (jsonString: string) => {
         False: "false",
         True: "true",
         None: "null",
-        High: '"high"', // 替换为字符串 "high"
-        Medium: '"medium"', // 替换为字符串 "medium"
-        Low: '"low"', // 替换为字符串 "low"
-        high: '"high"', // 替换为字符串 "high"
-        medium: '"medium"', // 替换为字符串 "medium"
-        low: '"low"', // 替换为字符串 "low"
+        High: "high", // 替换为字符串 "high"
+        Medium: "medium", // 替换为字符串 "medium"
+        Low: "low", // 替换为字符串 "low"
+        high: "high", // 替换为字符串 "high"
+        medium: "medium", // 替换为字符串 "medium"
+        low: "low", // 替换为字符串 "low"
         Yes: "Yes",
         No: "No",
     };
@@ -603,7 +603,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
 
         console.error(error);
         return {
-            error
+            error: JSON.stringify(error)
         }
     }
 };
