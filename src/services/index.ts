@@ -602,6 +602,9 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
     } catch (error: any) {
 
         console.error(error);
+        return {
+            error
+        }
     }
 };
 
@@ -881,5 +884,8 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
         }
     } catch (error: any) {
         console.error(error);
+        return {
+            error
+        }
     }
 };
