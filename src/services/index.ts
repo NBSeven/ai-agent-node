@@ -316,7 +316,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task4Payload = {
                 text: task1Result.data.topic,
                 model,
-                search: task1Result.data.results,
+                search: JSON.stringify(task3Result.data.results),
             };
             const task4Id = await startTask("/ai/reply/simple", task4Payload);
             debugger;
