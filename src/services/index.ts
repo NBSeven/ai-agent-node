@@ -198,12 +198,20 @@ async function waitForTaskCompletion(
 // 3.1 arthur_1风格渲染
 const renderText = async (data: any, twitter: string, type = 1) => {
     const map = new Map();
-    map.set(1, "3.2 arthur_1短文本/评论风格渲染");
-    map.set(2, "3.4 arthur_2长文本风格渲染");
-    map.set(3, "3.3 arthur_3风格渲染");
-    map.set(4, "3.5 arthur_4风格渲染");
-    map.set(5, "3.6 arthur_5风格渲染");
+    // map.set(1, "3.2 arthur_1短文本/评论风格渲染");
+    // map.set(2, "3.4 arthur_2长文本风格渲染");
+    // map.set(3, "3.3 arthur_3风格渲染");
+    // map.set(4, "3.5 arthur_4风格渲染");
+    // map.set(5, "3.6 arthur_5风格渲染");
 
+    map.set(1, "3.1 arthur_1短文本/评论风格渲染");
+    map.set(2, "3.2 InsiderFinance");
+    map.set(3, "3.3 Jon Crabb");
+    map.set(4, "3.4 0xANN");
+
+    map.set(5, "4.1 InsiderFinance");
+    map.set(6, "4.2 Jon Crabb");
+    map.set(7, "4.3 0xANN");
     let text = "";
     if (typeof data === "string") {
         text = data;
