@@ -8,6 +8,6 @@ router.post('/', postIndex);
 
 router.post('/twitter', t);
 router.post('/ltwitter', l);
-router.post('/lntwitter', ln);
+router.post('/Longtwitter', ln);
 
 export default router;

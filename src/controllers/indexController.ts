@@ -16,8 +16,8 @@ export const l = async (ctx: Context) => {
 };
 
 export const ln = async (ctx: Context) => {
-    const { text, summary }: any = ctx.request.body;
-    const res = await handleAddStepLN(text, summary);
+    const { title, summary }: any = ctx.request.body;
+    const res = await handleAddStepLN(title, summary);
     ctx.body = { message: res };
 };
 
