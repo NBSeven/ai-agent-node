@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import { handleAddStep, handleAddStepL } from '../services/index';
+import { handleAddStep, handleAddStepL, handleAddStepLN } from '../services/index';
 
 
 export const t = async (ctx: Context) => {
@@ -14,6 +14,13 @@ export const l = async (ctx: Context) => {
     const res = await handleAddStepL(text, type);
     ctx.body = { message: res };
 };
+
+export const ln = async (ctx: Context) => {
+    const { text, summary }: any = ctx.request.body;
+    const res = await handleAddStepLN(text, summary);
+    ctx.body = { message: res };
+};
+
 
 
 

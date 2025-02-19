@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { getIndex, postIndex, t, l } from '../controllers/indexController';
+import { getIndex, postIndex, t, l, ln } from '../controllers/indexController';
 
 const router = new Router();
 
@@ -8,5 +8,6 @@ router.post('/', postIndex);
 
 router.post('/twitter', t);
 router.post('/ltwitter', l);
+router.post('/lntwitter', ln);
 
 export default router;
