@@ -1,90 +1,3 @@
-// // 设置购买nft的价格区间
-// /**
-//  * 批量购买最优价的nft
-//  */
-// export const batchBuyNft = async (PRIVATE_KEY: string, minPrice: number, maxPrice: number, buyLimit: number = 1) => {
-
-//     interface bestParam {
-//         collection_slug: string
-//         minPrice: number
-//         maxPrice: number
-//         limit?: number
-//         next?: string
-//     }
-//     // let PRIVATE_KEY = '63dd7375a665aafa5bafd46b4db8943c693438c62e3b21ece08102360d595a1d'
-
-//     const walletWithProvider = new ethers.Wallet(PRIVATE_KEY, provider);
-
-//     const openseaSDK = new OpenSeaSDK(walletWithProvider, {
-//         chain: Chain.Sepolia, //Chain.Sepolia Chain.Mainnet
-//         apiKey: YOUR_API_KEY,
-//     });
-
-//     const accountAddress = walletWithProvider.address // The buyer's wallet address, also the taker\
-//     /**
-//      * 获取nft最优报价，需手动过滤价格
-//      * @param param0 
-//      * @returns 
-//      */
-//     const getBestListings = async ({ collection_slug, limit, minPrice, maxPrice }: bestParam) => {
-//         const res = await openseaSDK.api.getBestListings(collection_slug, limit)
-//         console.log(res, 'getBestListings')
-//         // console.log(res.listings[0].price)
-//         // console.log(res.listings[0].order_hash)
-//         // console.log(res.listings[0].protocol_data)
-//         // 过滤订单根据价格区间
-//         const filteredOrders = res.listings.filter(order => {
-//             const price = parseFloat(ethers.formatEther(order.price.current.value.toString()));
-//             return price >= minPrice && price <= maxPrice;
-//         });
-//         return filteredOrders
-//     }
-//     /**
-//      * 购买nft
-//      * @param order 
-//      */
-//     const buyItem = async (order: Order) => {
-//         try {
-//             const transactionHash = await openseaSDK.fulfillOrder({ order, accountAddress })
-//             console.log('Transaction successfully submitted. Hash:', transactionHash);
-//             // 查询交易状态
-//             const receipt = await provider.getTransactionReceipt(transactionHash);
-//             if (receipt?.status === 1) {
-//                 console.log('Transaction succeeded');
-//                 return 'Transaction succeeded'
-//             } else {
-//                 console.log('Transaction failed');
-//                 return 'Transaction failed'
-
-//             }
-//         } catch (error) {
-//             console.log(error);
-//             return 'Transaction failed | error'
-//         }
-
-//     }
-
-//     // 设置购买nft的价格区间
-//     // const minPrice = 0.01
-//     // const maxPrice = 0.2
-//     let orders = await getBestListings({ collection_slug, limit: buyLimit, minPrice, maxPrice })
-//     console.log(orders, 'orders')
-//     let res = await buyItem(orders[0])
-//     return res
-//     // let nonce = await provider.getTransactionCount(walletWithProvider.address)
-//     // console.log(nonce, 'nonce')
-//     // for (let i = 0; i < orders.length; i++) {
-//     //     // let newNonce = nonce + i + 1
-//     //     // console.log(newNonce, 'newNonce')
-//     //     setTimeout(() => {
-//     //         try {
-//     //             buyItem(orders[i], newNonce)
-//     //         } catch (error) {
-//     //             console.log(error)
-//     //         }
-//     //     }, i * 1000)
-//     // }
-// }
 
 const model = 'gpt-4o'
 const modelo1 = "gpt-o1";
@@ -255,6 +168,20 @@ const tavilySearch = async (title: string, text: string) => {
     return searchResult;
 };
 
+
+const taskFun = async (title: string, route: string, params: any) => {
+    const payload = {
+        ...params,
+        model,
+    };
+    const taskId = await startTask(route, payload);
+    const taskResult = await waitForTaskCompletion(taskId);
+    const taskStep = {
+        title,
+        jsonData: taskResult.res,
+    };
+    return taskResult;
+};
 export const handleAddStep = async (inputValue: string, type = 1) => {
     if (!inputValue) {
         return "请输入描述内容";
@@ -299,29 +226,26 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
 
         // 1.3 非预测市场话题回复生成
         if (task2Result.data.valuable === false) {
-            const task3Title = "1.3.1，使用 tavily 搜索前 10 条内容";
-            const task3Payload = {
-                text: task1Result.data.topic,
-                model,
-            };
-            const task3Id = await startTask("/ai/tavily/search", task3Payload);
-            const task3Result = await waitForTaskCompletion(task3Id);
-            const task3Step = {
-                title: task3Title, // 动态生成标题
-                jsonData: task3Result.res,
-            };
+            // const task3Title = "1.3.1，使用 tavily 搜索前 10 条内容";
+            // const task3Payload = {
+            //     text: task1Result.data.topic,
+            //     model,
+            // };
+            // const task3Id = await startTask("/ai/tavily/search", task3Payload);
+            // const task3Result = await waitForTaskCompletion(task3Id);
+            // const task3Step = {
+            //     title: task3Title, // 动态生成标题
+            //     jsonData: task3Result.res,
+            // };
 
-            // 1.3.2 非预测市场话题回复生成
-            const task4Title = "1.3.2 非预测市场话题回复生成";
+            // 1.3.1 非预测市场话题回复生成
+            const task4Title = "1.3.1 非预测市场话题回复生成";
             const task4Payload = {
-                text: task1Result.data.topic,
+                topic: task1Result.data.topic,
                 model,
-                search: JSON.stringify(task3Result.data.results),
             };
             const task4Id = await startTask("/ai/reply/simple", task4Payload);
-            debugger;
             const task4Result = await waitForTaskCompletion(task4Id);
-            debugger;
             const task4Step = {
                 title: task4Title, // 动态生成标题
                 jsonData: task4Result.res,
@@ -420,6 +344,39 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     jsonData: task8Result.res,
                 };
 
+
+
+                //1.4.3.1差异过大话题判断逻辑
+                const param1431 = {
+                    result: JSON.stringify(task8Result.data),
+                    topic:
+                        task2Result.data.selected_topic || task2Result.data.seleted_topic,
+                };
+                const task1431Result = await taskFun(
+                    "1.4.3.1差异过大话题判断逻辑",
+                    "/ai/analysis/diff",
+                    param1431
+                );
+
+                if (task1431Result.data["Large Difference"] === "true") {
+                    // 1.3.1 非预测市场话题回复生成
+                    const task4Title = "1.3.1 非预测市场话题回复生成";
+                    const task4Payload = {
+                        topic: task1Result.data.topic,
+                        model,
+                    };
+                    const task4Id = await startTask("/ai/reply/simple", task4Payload);
+                    const task4Result = await waitForTaskCompletion(task4Id);
+                    const task4Step = {
+                        title: task4Title, // 动态生成标题
+                        jsonData: task4Result.res,
+                    };
+                    return {
+                        result: [task4Step]
+                    }
+                }
+
+
                 //1.4.4 关键词生成
                 debugger;
                 const task11Title = "1.4.4 关键词生成";
@@ -511,9 +468,18 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     title: task13Title,
                     jsonData: task13Result.res,
                 };
+                //1.4.8.1 第二次审查
+                const param1481 = {
+                    result: JSON.stringify(task13Result.data),
+                };
+                const task1481Result = await taskFun(
+                    "1.4.8.1 第二次审查",
+                    "/ai/examination/second",
+                    param1481
+                );
 
                 const { evaluation_1, evaluation_2, evaluation_3 } =
-                    task13Result.data;
+                    task1481Result.data;
 
                 // - 根据上面的 JSON 结果中的 “evaluation_1” , “evaluation_2” 和 “evaluation_3” 进行判断：
                 // - 其中有一个为 "Yes" 或者都为 "Yes" 则跳转1.5.2
@@ -904,6 +870,329 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
         return "请输入title";
     }
 
+    // try {
+    //     // 1.1 多语言处理
+    //     const task1Title = "1.1 多语言处理";
+    //     const task1Payload = { text: inputValue, model }; // 初始参数
+    //     const task1Id = await startTask("ai/translate", task1Payload);
+    //     const task1Result = await waitForTaskCompletion(task1Id);
+    //     const task1Step = {
+    //         title: task1Title, // 动态生成标题
+    //         jsonData: task1Result.res,
+    //     };
+
+    //     // 第一次搜索（为翻译提供信息）
+    //     const task121Title = "第一次搜索（为翻译提供信息）";
+    //     const task121Payload = {
+    //         text: task1Result.data.topic,
+    //         model,
+    //     };
+    //     const task121Id = await startTask("/ai/tavily/search", task121Payload);
+    //     const task121Result = await waitForTaskCompletion(task121Id);
+    //     const task121Step = {
+    //         title: task121Title, // 动态生成标题
+    //         jsonData: task121Result.res,
+    //     };
+
+    //     //1.2 翻译
+    //     const task2Title = "1.2 翻译";
+    //     const task2Payload = {
+    //         search: JSON.stringify(task121Result.data.results),
+    //         model,
+    //         summary,
+    //         title: inputValue,
+    //     };
+    //     const task2Id = await startTask("/generate_tweet/1/2", task2Payload);
+    //     const task2Result = await waitForTaskCompletion(task2Id);
+    //     const task2Step = {
+    //         title: task2Title, // 动态生成标题
+    //         jsonData: task2Result.res,
+    //     };
+    //     //2.1
+    //     const task21Title = "第二次搜索（英文搜索内容，支持话题提取）";
+    //     const task21Payload = {
+    //         text: task2Result.data.title,
+    //         model,
+    //     };
+    //     const task21Id = await startTask("/ai/tavily/search", task21Payload);
+    //     const task21Result = await waitForTaskCompletion(task21Id);
+    //     const task21Step = {
+    //         title: task21Title, // 动态生成标题
+    //         jsonData: task21Result.res,
+    //     };
+    //     //2.2提取话题
+    //     const task22Title = "提取话题";
+    //     const task22Payload = {
+    //         summary: task2Result.data.summary,
+    //         title: task2Result.data.title,
+    //         model,
+    //         search: JSON.stringify(task121Result.data.results),
+    //         // topic: task2Result.data.title,
+    //     };
+    //     const task22Id = await startTask("/generate_tweet/2/2", task22Payload);
+    //     const task22Result = await waitForTaskCompletion(task22Id);
+    //     const task22Step = {
+    //         title: task22Title, // 动态生成标题
+    //         jsonData: task22Result.res,
+    //     };
+    //     //2.3话题搜索
+    //     const task23Title = "话题搜索";
+    //     const task23Payload = {
+    //         text: JSON.stringify({
+    //             topic: task22Result.data.topic,
+    //             search_time_range: task22Result.data.search_time_range,
+    //         }),
+    //         model,
+    //     };
+    //     const task23Id = await startTask("/ai/tavily/search", task23Payload);
+    //     const task23Result = await waitForTaskCompletion(task23Id);
+    //     const task23Step = {
+    //         title: task23Title, // 动态生成标题
+    //         jsonData: task23Result.res,
+    //     };
+    //     //2.4 第一次话题优化
+    //     const task24Title = "2.4 第一次话题优化";
+    //     const task24Payload = {
+    //         topic: task22Result.data.topic,
+    //         search: JSON.stringify(task23Result.data.results),
+    //         model,
+    //     };
+    //     const task24Id = await startTask("/generate_tweet/2/4", task24Payload);
+    //     const task24Result = await waitForTaskCompletion(task24Id);
+    //     const task24Step = {
+    //         title: task24Title, // 动态生成标题
+    //         jsonData: task24Result.res,
+    //     };
+    //     //3.1 关键词生成
+    //     const task31Title = "3.1 关键词生成";
+    //     const task31Payload = {
+    //         topic: task24Result.data.topic,
+    //         model,
+    //     };
+    //     const task31Id = await startTask("/generate_tweet/3/1", task31Payload);
+    //     const task31Result = await waitForTaskCompletion(task31Id);
+    //     const task31Step = {
+    //         title: task31Title, // 动态生成标题
+    //         jsonData: task31Result.res,
+    //     };
+    //     //3.2 第三次搜索：关键词搜索
+    //     const task32Title = "3.2 第三次搜索：关键词搜索";
+    //     const task32Payload = {
+    //         text: JSON.stringify(task31Result.data.keys),
+    //         model,
+    //     };
+    //     const task32Id = await startTask("/ai/tavily/search", task32Payload);
+    //     const task32Result = await waitForTaskCompletion(task32Id);
+    //     const task32Step = {
+    //         title: task32Title, // 动态生成标题
+    //         jsonData: task32Result.res,
+    //     };
+    //     //3.3 关键词搜索结果总结和分析
+    //     const task33Title = "3.3 关键词搜索结果总结和分析";
+    //     const task33Payload = {
+    //         keywords: JSON.stringify(task31Result.data.keys),
+    //         search: JSON.stringify(task32Result.data.results),
+    //         model,
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task33Id = await startTask("/generate_tweet/3/3", task33Payload);
+    //     const task33Result = await waitForTaskCompletion(task33Id);
+    //     const task33Step = {
+    //         title: task33Title, // 动态生成标题
+    //         jsonData: task33Result.res,
+    //     };
+    //     //4.1 第四次搜索：对话题搜索
+    //     const task41Title = "4.1 第四次搜索：对话题搜索";
+    //     const task41Payload = {
+    //         text: task24Result.data.topic,
+    //         model,
+    //     };
+    //     const task41Id = await startTask("/ai/tavily/search", task41Payload);
+    //     const task41Result = await waitForTaskCompletion(task41Id);
+    //     const task41Step = {
+    //         title: task41Title, // 动态生成标题
+    //         jsonData: task41Result.res,
+    //     };
+    //     //4.2 对于话题进行提问
+    //     const task42Title = "4.2 对于话题进行提问";
+    //     const task42Payload = {
+    //         // keywords: task33Result.data.keywords,
+    //         keywords: JSON.stringify(task33Result.data),
+    //         model,
+    //         reason: task24Result.data.reason,
+    //         search: JSON.stringify(task41Result.data.results),
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task42Id = await startTask("/generate_tweet/4/2", task42Payload);
+    //     const task42Result = await waitForTaskCompletion(task42Id);
+    //     const task42Step = {
+    //         title: task42Title, // 动态生成标题
+    //         jsonData: task42Result.res,
+    //     };
+    //     const {
+    //         date_range_question_1,
+    //         date_range_question_2,
+    //         date_range_question_3,
+    //         question_1,
+    //         question_2,
+    //         question_3,
+    //     } = task42Result.data;
+    //     //4.3.1 问题 i 的搜索(i=1,2,3)
+    //     const task4311Title = "4.3.1 问题 1的搜索";
+    //     const task4311Payload = {
+    //         model,
+    //         text: JSON.stringify({ date_range_question_1, question_1 }),
+    //     };
+    //     const task4311Id = await startTask(
+    //         "/ai/tavily/search",
+    //         task4311Payload
+    //     );
+    //     const task4311Result = await waitForTaskCompletion(task4311Id);
+    //     const task4311Step = {
+    //         title: task4311Title, // 动态生成标题
+    //         jsonData: task4311Result.res,
+    //     };
+
+    //     const task4312Title = "4.3.1 问题 2的搜索";
+    //     const task4312Payload = {
+    //         model,
+    //         text: JSON.stringify({ date_range_question_2, question_2 }),
+    //     };
+    //     const task4312Id = await startTask(
+    //         "/ai/tavily/search",
+    //         task4312Payload
+    //     );
+    //     const task4312Result = await waitForTaskCompletion(task4312Id);
+    //     const task4312Step = {
+    //         title: task4312Title, // 动态生成标题
+    //         jsonData: task4312Result.res,
+    //     };
+
+    //     const task4313Title = "4.3.1 问题 3的搜索";
+    //     const task4313Payload = {
+    //         model,
+    //         text: JSON.stringify({ date_range_question_3, question_3 }),
+    //     };
+    //     const task4313Id = await startTask(
+    //         "/ai/tavily/search",
+    //         task4313Payload
+    //     );
+    //     const task4313Result = await waitForTaskCompletion(task4313Id);
+    //     const task4313Step = {
+    //         title: task4313Title, // 动态生成标题
+    //         jsonData: task4313Result.res,
+    //     };
+
+    //     //4.3.2 对于问题i的搜索内容做总结
+    //     const task4321Title = "4.3.2 问题 1的搜索内容做总结";
+    //     const task4321Payload = {
+    //         model,
+    //         questions: question_1,
+    //         search: JSON.stringify(task4311Result.data.results),
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task4321Id = await startTask(
+    //         "/generate_tweet/4/3/2",
+    //         task4321Payload
+    //     );
+    //     const task4321Result = await waitForTaskCompletion(task4321Id);
+    //     const task4321Step = {
+    //         title: task4321Title, // 动态生成标题
+    //         jsonData: task4321Result.res,
+    //     };
+
+    //     //4.3.2 对于问题i的搜索内容做总结
+    //     const task4322Title = "4.3.2 问题 2的搜索内容做总结";
+    //     const task4322Payload = {
+    //         model,
+    //         questions: question_2,
+    //         search: JSON.stringify(task4312Result.data.results),
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task4322Id = await startTask(
+    //         "/generate_tweet/4/3/2",
+    //         task4322Payload
+    //     );
+    //     const task4322Result = await waitForTaskCompletion(task4322Id);
+    //     const task4322Step = {
+    //         title: task4322Title, // 动态生成标题
+    //         jsonData: task4322Result.res,
+    //     };
+
+    //     //4.3.2 对于问题i的搜索内容做总结
+    //     const task4323Title = "4.3.2 问题 3的搜索内容做总结";
+    //     const task4323Payload = {
+    //         model,
+    //         questions: question_3,
+    //         search: JSON.stringify(task4313Result.data.results),
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task4323Id = await startTask(
+    //         "/generate_tweet/4/3/2",
+    //         task4323Payload
+    //     );
+    //     const task4323Result = await waitForTaskCompletion(task4323Id);
+    //     const task4323Step = {
+    //         title: task4323Title, // 动态生成标题
+    //         jsonData: task4323Result.res,
+    //     };
+
+    //     //4.4大纲生成
+    //     const task44Title = "4.4大纲生成";
+    //     const task44Payload = {
+    //         model,
+    //         result1: JSON.stringify(task4321Result.data),
+    //         result2: JSON.stringify(task4322Result.data),
+    //         result3: JSON.stringify(task4323Result.data),
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task44Id = await startTask("/generate_tweet/4/4", task44Payload);
+    //     const task44Result = await waitForTaskCompletion(task44Id);
+    //     const task44Step = {
+    //         title: task44Title, // 动态生成标题
+    //         jsonData: task44Result.res,
+    //     };
+
+    //     //4.5 长推生成
+    //     const task45Title = "4.5 长推生成";
+    //     const task45Payload = {
+    //         model,
+    //         keywords: JSON.stringify(task33Result.data),
+    //         outline: JSON.stringify(task44Result.data),
+    //         result1: JSON.stringify(task4321Result.data),
+    //         result2: JSON.stringify(task4322Result.data),
+    //         result3: JSON.stringify(task4323Result.data),
+    //         topic: task24Result.data.topic,
+    //     };
+    //     const task45Id = await startTask("/generate_tweet/4/5", task45Payload);
+    //     const task45Result = await waitForTaskCompletion(task45Id);
+    //     const task45Step = {
+    //         title: task45Title, // 动态生成标题
+    //         jsonData: task45Result.res,
+    //     };
+
+    //     //4.6 风格渲染
+    //     const task46Title = "4.6 风格渲染";
+    //     const task46Payload = {
+    //         model,
+    //         topic: task24Result.data.topic,
+    //         text: JSON.stringify(task45Result.data),
+    //     };
+    //     const task46Id = await startTask("/generate_tweet/4/6", task46Payload);
+    //     const task46Result = await waitForTaskCompletion(task46Id);
+    //     const task46Step = {
+    //         title: task46Title, // 动态生成标题
+    //         jsonData: task46Result.res,
+    //     };
+    //     return {
+    //         result: task46Step
+    //     }
+    // } catch (error: any) {
+    //     return {
+    //         error: error.toString()
+    //     }
+    // }
+
     try {
         // 1.1 多语言处理
         const task1Title = "1.1 多语言处理";
@@ -969,38 +1258,57 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             title: task22Title, // 动态生成标题
             jsonData: task22Result.res,
         };
-        //2.3话题搜索
-        const task23Title = "话题搜索";
-        const task23Payload = {
+        //2.3  话题评估
+        const param23 = {
+            reason: JSON.stringify(task22Result.data.topics),
+            summary: task2Result.data.summary,
+            title: task2Result.data.title,
+        };
+        debugger;
+        const task23Result = await taskFun(
+            "2.3提取话题",
+            "/generate_tweet/2/3",
+            param23
+        );
+
+        //2.4  话题评估
+        const param24 = {
+            evaluation: JSON.stringify(task23Result.data),
+        };
+        const task24Result = await taskFun(
+            "2.4话题评估",
+            "/generate_tweet/2/4",
+            param24
+        );
+
+        //2.5  话题搜索
+        const param25 = {
             text: JSON.stringify({
-                topic: task22Result.data.topic,
-                search_time_range: task22Result.data.search_time_range,
+                topic: task24Result.data.topic,
+                search_time_range: task24Result.data.search_time_range,
             }),
-            model,
         };
-        const task23Id = await startTask("/ai/tavily/search", task23Payload);
-        const task23Result = await waitForTaskCompletion(task23Id);
-        const task23Step = {
-            title: task23Title, // 动态生成标题
-            jsonData: task23Result.res,
+        const task25Result = await taskFun(
+            "2.5话题搜索",
+            "/ai/tavily/search",
+            param25
+        );
+
+        //2.6 第一次话题优化
+        const param26 = {
+            topic: task24Result.data.topic,
+            search: JSON.stringify(task25Result.data.results),
         };
-        //2.4 第一次话题优化
-        const task24Title = "2.4 第一次话题优化";
-        const task24Payload = {
-            topic: task22Result.data.topic,
-            search: JSON.stringify(task23Result.data.results),
-            model,
-        };
-        const task24Id = await startTask("/generate_tweet/2/4", task24Payload);
-        const task24Result = await waitForTaskCompletion(task24Id);
-        const task24Step = {
-            title: task24Title, // 动态生成标题
-            jsonData: task24Result.res,
-        };
+        const task26Result = await taskFun(
+            "2.6 第一次话题优化",
+            "/generate_tweet/2/6",
+            param26
+        );
+
         //3.1 关键词生成
         const task31Title = "3.1 关键词生成";
         const task31Payload = {
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
             model,
         };
         const task31Id = await startTask("/generate_tweet/3/1", task31Payload);
@@ -1027,7 +1335,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             keywords: JSON.stringify(task31Result.data.keys),
             search: JSON.stringify(task32Result.data.results),
             model,
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
         };
         const task33Id = await startTask("/generate_tweet/3/3", task33Payload);
         const task33Result = await waitForTaskCompletion(task33Id);
@@ -1038,7 +1346,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
         //4.1 第四次搜索：对话题搜索
         const task41Title = "4.1 第四次搜索：对话题搜索";
         const task41Payload = {
-            text: task24Result.data.topic,
+            text: task26Result.data.topic,
             model,
         };
         const task41Id = await startTask("/ai/tavily/search", task41Payload);
@@ -1053,9 +1361,9 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             // keywords: task33Result.data.keywords,
             keywords: JSON.stringify(task33Result.data),
             model,
-            reason: task24Result.data.reason,
+            reason: task26Result.data.reason,
             search: JSON.stringify(task41Result.data.results),
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
         };
         const task42Id = await startTask("/generate_tweet/4/2", task42Payload);
         const task42Result = await waitForTaskCompletion(task42Id);
@@ -1123,7 +1431,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             model,
             questions: question_1,
             search: JSON.stringify(task4311Result.data.results),
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
         };
         const task4321Id = await startTask(
             "/generate_tweet/4/3/2",
@@ -1141,7 +1449,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             model,
             questions: question_2,
             search: JSON.stringify(task4312Result.data.results),
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
         };
         const task4322Id = await startTask(
             "/generate_tweet/4/3/2",
@@ -1159,7 +1467,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             model,
             questions: question_3,
             search: JSON.stringify(task4313Result.data.results),
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
         };
         const task4323Id = await startTask(
             "/generate_tweet/4/3/2",
@@ -1209,7 +1517,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
         const task46Title = "4.6 风格渲染";
         const task46Payload = {
             model,
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
             text: JSON.stringify(task45Result.data),
         };
         const task46Id = await startTask("/generate_tweet/4/6", task46Payload);
@@ -1218,6 +1526,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             title: task46Title, // 动态生成标题
             jsonData: task46Result.res,
         };
+
         return {
             result: task46Step
         }
