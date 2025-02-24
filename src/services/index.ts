@@ -45,14 +45,36 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
     return data.task_id; // 假设任务 ID 存在于 data.taskId
 }
 
+// // 模拟任务状态查询接口：根据任务 ID 查询状态
+// async function checkTaskStatus(task_id: string): Promise<any> {
+//     const response = await fetch(
+//         `https://myapp-258904095968.asia-east1.run.app/v1.3/task/${task_id}`
+//     );
+//     const data = await response.json();
+//     return data; // 假设返回的 data 包含 { status: "pending" | "success" | "error", result: any }
+// }
 // 模拟任务状态查询接口：根据任务 ID 查询状态
-async function checkTaskStatus(task_id: string): Promise<any> {
-    const response = await fetch(
-        `https://myapp-258904095968.asia-east1.run.app/v1.3/task/${task_id}`
-    );
-    const data = await response.json();
-    return data; // 假设返回的 data 包含 { status: "pending" | "success" | "error", result: any }
-}
+export async function checkTaskStatus(task_id: string): Promise<any> {
+    const retries = 20
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(
+          `https://myapp-258904095968.asia-east1.run.app/v1.3/task/${task_id}`, {
+          headers: { "Connection": 'keep-alive' },
+        }
+        );
+        const data = await response.json();
+        return data; // 假设返回的 data 包含 { status: "pending" | "success" | "error", result: any }
+      } catch (error) {
+        console.warn(`请求失败，重试`, error);
+        await new Promise(res => setTimeout(res, 2000)); // 2s 重试
+      }
+    }
+  
+    throw new Error("请求多次失败");
+  
+  }
+  
 
 // 轮询任务状态，增加最大次数限制
 async function waitForTaskCompletion(
