@@ -57,24 +57,24 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
 export async function checkTaskStatus(task_id: string): Promise<any> {
     const retries = 20
     for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch(
-          `https://myapp-258904095968.asia-east1.run.app/v1.3/task/${task_id}`, {
-          headers: { "Connection": 'keep-alive' },
+        try {
+            const response = await fetch(
+                `https://myapp-258904095968.asia-east1.run.app/v1.3/task/${task_id}`, {
+                headers: { "Connection": 'keep-alive' },
+            }
+            );
+            const data = await response.json();
+            return data; // 假设返回的 data 包含 { status: "pending" | "success" | "error", result: any }
+        } catch (error) {
+            console.warn(`请求失败，重试`, error);
+            await new Promise(res => setTimeout(res, 2000)); // 2s 重试
         }
-        );
-        const data = await response.json();
-        return data; // 假设返回的 data 包含 { status: "pending" | "success" | "error", result: any }
-      } catch (error) {
-        console.warn(`请求失败，重试`, error);
-        await new Promise(res => setTimeout(res, 2000)); // 2s 重试
-      }
     }
-  
+
     throw new Error("请求多次失败");
-  
-  }
-  
+
+}
+
 
 // 轮询任务状态，增加最大次数限制
 async function waitForTaskCompletion(
@@ -211,8 +211,21 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
 
     try {
         // 1.1 多语言处理
-        const task1Title = "1.1 多语言处理";
-        const task1Payload = { text: inputValue, model }; // 初始参数
+        const param111 = {
+            text: inputValue,
+            model,
+        };
+        const task111Result = await taskFun(
+            "1.1.1原始语言搜索",
+            "/ai/tavily/search",
+            param111
+        );
+        const task1Title = "1.1.2翻译";
+        const task1Payload = {
+            text: inputValue,
+            model,
+            search: JSON.stringify(task111Result.data.results),
+        }; //
         const task1Id = await startTask("ai/translate", task1Payload);
         const task1Result = await waitForTaskCompletion(task1Id);
         const task1Step = {
@@ -609,8 +622,21 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
     }
     try {
         // 1.1 多语言处理
-        const task1Title = "1.1 多语言处理";
-        const task1Payload = { text: inputValue, model }; // 初始参数
+        const param111 = {
+            text: inputValue,
+            model,
+        };
+        const task111Result = await taskFun(
+            "1.1.1原始语言搜索",
+            "/ai/tavily/search",
+            param111
+        );
+        const task1Title = "1.1.2翻译";
+        const task1Payload = {
+            text: inputValue,
+            model,
+            search: JSON.stringify(task111Result.data.results),
+        }; //
         const task1Id = await startTask("ai/translate", task1Payload);
         const task1Result = await waitForTaskCompletion(task1Id);
         const task1Step = {
