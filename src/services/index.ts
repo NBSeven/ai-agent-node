@@ -461,6 +461,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
                     model,
+                    log:JSON.stringify(task8Result.data.log),
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };
@@ -810,6 +811,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
                     model,
+                    log:JSON.stringify(task8Result.data.log),
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };
