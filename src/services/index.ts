@@ -920,8 +920,21 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
 
     try {
         // 1.1 多语言处理
-        const task1Title = "1.1 多语言处理";
-        const task1Payload = { text: inputValue, model }; // 初始参数
+        const param111 = {
+            text: inputValue,
+            model,
+        };
+        const task111Result = await taskFun(
+            "1.1.1原始语言搜索",
+            "/ai/tavily/search",
+            param111
+        );
+        const task1Title = "1.1.2翻译";
+        const task1Payload = {
+            text: inputValue,
+            model,
+            search: JSON.stringify(task111Result.data.results),
+        }; //
         const task1Id = await startTask("ai/translate", task1Payload);
         const task1Result = await waitForTaskCompletion(task1Id);
         const task1Step = {
