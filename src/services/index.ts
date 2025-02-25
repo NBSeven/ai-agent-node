@@ -565,7 +565,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
 
                     ////返回结果
                     return {
-                        result: [rt]
+                        result: rt
                     }
                 }
             } else {
@@ -589,7 +589,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 let rt1 = await renderText(task16Result.data, inputValue);
 
                 return {
-                    result: [rt1]
+                    result: rt1
                 }
             }
 
@@ -866,7 +866,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
 
                     ////返回结果
                     return {
-                        result: [rt]
+                        result: rt
                     }
                 }
             } else {
