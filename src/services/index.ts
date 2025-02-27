@@ -461,7 +461,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
                     model,
-                    log:JSON.stringify(task8Result.data.log),
+                    log: JSON.stringify(task8Result.data.log),
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };
@@ -811,7 +811,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
                     model,
-                    log:JSON.stringify(task8Result.data.log),
+                    log: JSON.stringify(task8Result.data.log),
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };
@@ -1004,7 +1004,6 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             summary: task2Result.data.summary,
             title: task2Result.data.title,
         };
-        debugger;
         const task23Result = await taskFun(
             "2.3提取话题",
             "/generate_tweet/2/3",
@@ -1266,11 +1265,12 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             title: task46Title, // 动态生成标题
             jsonData: task46Result.res,
         };
-
+        console.log(task46Step,'渲染完成')
         return {
             result: task46Step
         }
     } catch (error: any) {
+        console.log(error,'error')
         return {
             error: error.toString()
         }
