@@ -622,7 +622,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             .then(() => {
                 console.log('Message sent successfully');
             })
-            .catch((error) => {
+            .catch((error:any) => {
                 console.error('Error sending message:', error);
             });
         return {
@@ -925,7 +925,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
             .then(() => {
                 console.log('Message sent successfully');
             })
-            .catch((error) => {
+            .catch((error:any) => {
                 console.error('Error sending message:', error);
             });
         return {
@@ -1298,7 +1298,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             .then(() => {
                 console.log('Message sent successfully');
             })
-            .catch((error) => {
+            .catch((error:any) => {
                 console.error('Error sending message:', error);
             });
         return {
