@@ -1,7 +1,14 @@
 
 const model = 'gpt-4o'
 const modelo1 = "gpt-o1";
+const TelegramBot = require('node-telegram-bot-api');
 
+// 使用你自己的 Telegram Token
+const token = '7344087986:AAFqqIpEoqvrQijzyR6A07lKaLnQ8GTjm-M';
+const bot = new TelegramBot(token, { polling: true });
+
+// 发送消息
+const chatId = '-1002151477381'; // 你要发送消息的聊天 ID
 // 格式化处理
 const fixJsonString = (jsonString: string) => {
     const mapping: any = {
@@ -601,7 +608,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     jsonData: task16Result.res,
                 };
                 let rt1 = await renderText(task16Result.data, inputValue);
-
+                console.log(rt1, '渲染完成')
                 return {
                     result: rt1
                 }
@@ -611,6 +618,13 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
     } catch (error: any) {
 
         console.error(error);
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error) => {
+                console.error('Error sending message:', error);
+            });
         return {
             error: error.toString()
         }
@@ -906,6 +920,14 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
         }
     } catch (error: any) {
         console.error(error);
+
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error) => {
+                console.error('Error sending message:', error);
+            });
         return {
             error: error.toString()
         }
@@ -1265,12 +1287,20 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             title: task46Title, // 动态生成标题
             jsonData: task46Result.res,
         };
-        console.log(task46Step,'渲染完成')
+        console.log(task46Step, '渲染完成')
         return {
             result: task46Step
         }
     } catch (error: any) {
-        console.log(error,'error')
+        console.log(error, 'error')
+
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error) => {
+                console.error('Error sending message:', error);
+            });
         return {
             error: error.toString()
         }
