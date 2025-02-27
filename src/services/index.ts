@@ -1,7 +1,7 @@
+import TelegramBot from 'node-telegram-bot-api';
 
 const model = 'gpt-4o'
 const modelo1 = "gpt-o1";
-const TelegramBot = require('node-telegram-bot-api');
 
 // 使用你自己的 Telegram Token
 const token = '7344087986:AAFqqIpEoqvrQijzyR6A07lKaLnQ8GTjm-M';
