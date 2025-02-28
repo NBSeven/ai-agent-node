@@ -119,11 +119,11 @@ async function waitForTaskCompletion(
                 }; // 任务成功，返回结果
             }
         } else if (statusResponse.status === "error") {
-            console.error(`任务执行失败: ${taskId} ${statusResponse.message}`);
-            throw new Error(`任务执行失败: ${taskId}`);
+            console.error(`任务执行失败: ${taskId} ${statusResponse}`);
+            throw new Error(`任务执行失败: ${taskId} ,${JSON.stringify(statusResponse)}`);
         } else if (statusResponse.status === "failed") {
-            console.error(`Task failed:${statusResponse.error}`);
-            throw new Error(`任务执行失败: ${taskId}`);
+            console.error(`Task failed:${statusResponse}`);
+            throw new Error(`任务执行失败: ${taskId},${JSON.stringify(statusResponse)}`);
         }
 
         console.log(
@@ -622,7 +622,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             .then(() => {
                 console.log('Message sent successfully');
             })
-            .catch((error:any) => {
+            .catch((error: any) => {
                 console.error('Error sending message:', error);
             });
         return {
@@ -925,7 +925,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
             .then(() => {
                 console.log('Message sent successfully');
             })
-            .catch((error:any) => {
+            .catch((error: any) => {
                 console.error('Error sending message:', error);
             });
         return {
@@ -1298,7 +1298,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             .then(() => {
                 console.log('Message sent successfully');
             })
-            .catch((error:any) => {
+            .catch((error: any) => {
                 console.error('Error sending message:', error);
             });
         return {
