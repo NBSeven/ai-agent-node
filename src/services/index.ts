@@ -50,7 +50,7 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
         );
         const data = await response.json();
         return data.task_id; // 假设任务 ID 存在于 data.taskId
-    } catch (error) {
+    } catch (error:any) {
         console.log(error)
         throw new Error(`startTask: ${error.toString()},${taskPayload}`);
     }
