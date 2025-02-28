@@ -39,17 +39,22 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // 模拟任务执行接口：返回任务 ID
 async function startTask(path: string, taskPayload: any): Promise<string> {
-    const response = await fetch(
-        `https://myapp-258904095968.asia-east1.run.app/${path}`,
-        {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(taskPayload),
-        }
-    );
-    const data = await response.json();
-    //
-    return data.task_id; // 假设任务 ID 存在于 data.taskId
+    try {
+        const response = await fetch(
+            `https://myapp-258904095968.asia-east1.run.app/${path}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(taskPayload),
+            }
+        );
+        const data = await response.json();
+        return data.task_id; // 假设任务 ID 存在于 data.taskId
+    } catch (error) {
+        console.log(error)
+        throw new Error(`startTask: ${error.toString()},${taskPayload}`);
+    }
+
 }
 
 // // 模拟任务状态查询接口：根据任务 ID 查询状态
