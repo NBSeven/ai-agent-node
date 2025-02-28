@@ -4,11 +4,11 @@ const model = 'gpt-4o'
 const modelo1 = "gpt-o1";
 
 // 使用你自己的 Telegram Token
-const token = '7344087986:AAFqqIpEoqvrQijzyR6A07lKaLnQ8GTjm-M';
+const token = '7812402354:AAHqfpWo_219_E4HU1iyR-29aeR0EVjKO_c';
 const bot = new TelegramBot(token, { polling: true });
 
 // 发送消息
-const chatId = '-1002151477381'; // 你要发送消息的聊天 ID
+const chatId = '-1002423693501'; // 你要发送消息的聊天 ID
 // 格式化处理
 const fixJsonString = (jsonString: string) => {
     const mapping: any = {
@@ -73,7 +73,7 @@ export async function checkTaskStatus(task_id: string): Promise<any> {
             const data = await response.json();
             return data; // 假设返回的 data 包含 { status: "pending" | "success" | "error", result: any }
         } catch (error) {
-            console.warn(`请求失败，重试`, error);
+            console.log(`请求失败，重试`, error);
             await new Promise(res => setTimeout(res, 2000)); // 2s 重试
         }
     }
