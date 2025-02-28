@@ -513,7 +513,9 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 };
                 //1.4.8.1 第二次审查
                 const param1481 = {
-                    result: JSON.stringify(task13Result.data),
+                    search_result: JSON.stringify(dateres147.data.results),
+                    optimize_result: JSON.stringify(task12Result.data),
+                    judge_result: JSON.stringify(task13Result.data),
                 };
                 const task1481Result = await taskFun(
                     "1.4.8.1 第二次审查",
