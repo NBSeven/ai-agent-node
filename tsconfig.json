@@ -2,9 +2,10 @@
     "compilerOptions": {
       "target": "ES6",
       "module": "commonjs",
-      "strict": true,
+      "strict": false,
       "esModuleInterop": true,
-      "outDir": "./dist"
+      "outDir": "./dist",
+      "sourceMap": true  // 必须开启 SourceMap 以支持调试
     },
     "include": ["src/**/*.ts"],
     "exclude": ["node_modules"]

@@ -50,7 +50,7 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
         );
         const data = await response.json();
         return data.task_id; // 假设任务 ID 存在于 data.taskId
-    } catch (error:any) {
+    } catch (error: any) {
         console.log(error)
         throw new Error(`startTask: ${error.toString()},${taskPayload}`);
     }
@@ -216,6 +216,11 @@ const taskFun = async (title: string, route: string, params: any) => {
     };
     return taskResult;
 };
+
+function getRandom(...args: number[]) {
+    return args[Math.floor(Math.random() * args.length)];
+}
+
 export const handleAddStep = async (inputValue: string, type = 1) => {
     if (!inputValue) {
         return "请输入描述内容";
@@ -473,7 +478,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
                     model,
-                    log: JSON.stringify(task8Result.data.log),
+                    // log: JSON.stringify(task8Result.data.log),
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };
@@ -832,7 +837,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
                     model,
-                    log: JSON.stringify(task8Result.data.log),
+                    // log: JSON.stringify(task8Result.data.log),
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };

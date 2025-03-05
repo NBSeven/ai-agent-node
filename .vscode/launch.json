@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug TS with ts-node",
+      "runtimeArgs": ["-r", "ts-node/register"], // 使用 ts-node 直接运行 TS 文件
+      "args": ["${workspaceFolder}/src/app.ts"], // 入口文件路径
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true, // 启用 SourceMap
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Compiled JS",
+      "program": "${workspaceFolder}/dist/app.js", // 编译后的入口文件
+      "preLaunchTask": "tsc: build", // 调试前自动编译 TS
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"], // 指定 JS 文件路径
+      "sourceMaps": true, // 启用 SourceMap
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
