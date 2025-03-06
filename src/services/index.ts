@@ -1018,7 +1018,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             jsonData: task21Result.res,
         };
         let task24Result = null;
-        if (task13Result.data.predictionMarketTopic === "false") {
+        if (task13Result.data.containsPredictionMarketTopic === "false") {
             //2.2提取话题
             const task22Title = "提取话题";
             const task22Payload = {
