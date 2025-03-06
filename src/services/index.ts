@@ -1052,6 +1052,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             //2.4  话题评估
             const param24 = {
                 evaluation: JSON.stringify(task23Result.data),
+                summary: task2Result.data.summary,
             };
             task24Result = await taskFun(
                 "2.4话题评估",
