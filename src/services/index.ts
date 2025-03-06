@@ -1038,8 +1038,6 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
                 jsonData: task22Result.res,
                 input: task22Payload,
             };
-            setSteps((prevSteps) => [...prevSteps, task22Step]);
-
             //2.3  话题评估
             const param23 = {
                 reason: JSON.stringify(task22Result.data.topics),
@@ -1278,7 +1276,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             result1: JSON.stringify(task4321Result.data),
             result2: JSON.stringify(task4322Result.data),
             result3: JSON.stringify(task4323Result.data),
-            topic: task24Result.data.topic,
+            topic: task26Result.data.topic,
         };
         const task44Id = await startTask("/generate_tweet/4/4", task44Payload);
         const task44Result = await waitForTaskCompletion(task44Id);
