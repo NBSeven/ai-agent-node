@@ -145,20 +145,14 @@ async function waitForTaskCompletion(
 // 3.1 arthur_1风格渲染
 const renderText = async (data: any, twitter: string, type = 1) => {
     const map = new Map();
-    // map.set(1, "3.2 arthur_1短文本/评论风格渲染");
-    // map.set(2, "3.4 arthur_2长文本风格渲染");
-    // map.set(3, "3.3 arthur_3风格渲染");
-    // map.set(4, "3.5 arthur_4风格渲染");
-    // map.set(5, "3.6 arthur_5风格渲染");
+    // map.set(1, "3.1 arthur_1短文本/评论风格渲染");
+    map.set(1, "3.2 InsiderFinance");
+    map.set(2, "3.3 Jon Crabb");
+    map.set(3, "3.4 0xANN");
 
-    map.set(1, "3.1 arthur_1短文本/评论风格渲染");
-    map.set(2, "3.2 InsiderFinance");
-    map.set(3, "3.3 Jon Crabb");
-    map.set(4, "3.4 0xANN");
-
-    map.set(5, "4.1 InsiderFinance");
-    map.set(6, "4.2 Jon Crabb");
-    map.set(7, "4.3 0xANN");
+    map.set(4, "4.1 InsiderFinance");
+    map.set(5, "4.2 Jon Crabb");
+    map.set(6, "4.3 0xANN");
     let text = "";
     if (typeof data === "string") {
         text = data;
@@ -588,12 +582,6 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                         jsonData: task14Result.res,
                     };
 
-                    // let rt1 = await renderText(task14Result.data, inputValue, 1);
-                    // let rt2 = await renderText(task14Result.data, inputValue, 2);
-                    // let rt3 = await renderText(task14Result.data, inputValue, 3);
-                    // let rt4 = await renderText(task14Result.data, inputValue, 4);
-                    // let rt5 = await renderText(task14Result.data, inputValue, 5);
-
                     let rt = await renderText(task14Result.data, inputValue, type);
 
                     ////返回结果
@@ -911,11 +899,6 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
                         jsonData: task14Result.res,
                     };
 
-                    // let rt1 = await renderText(task14Result.data, inputValue, 1);
-                    // let rt2 = await renderText(task14Result.data, inputValue, 2);
-                    // let rt3 = await renderText(task14Result.data, inputValue, 3);
-                    // let rt4 = await renderText(task14Result.data, inputValue, 4);
-                    // let rt5 = await renderText(task14Result.data, inputValue, 5);
                     let rt = await renderText(task14Result.data, inputValue, type);
 
                     ////返回结果
@@ -1005,6 +988,23 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             title: task2Title, // 动态生成标题
             jsonData: task2Result.res,
         };
+
+
+        //1.3判断是否包含预测市场话题
+        const param13 = {
+            summary: task2Result.data.summary,
+            title: task2Result.data.title,
+            model,
+        };
+
+        //"containsPredictionMarketTopic": "True or False", "predictionMarketTopic": "If containsPredictionMarketTopic is True, extract the prediction market topic from the input. If containsPredictionMarketTopic is False, return None."
+        //如果{1.3的包含预测市场判断结果}为False，进入2.2，否则进入2.2.1
+        //task13Result.data.containsPredictionMarketTopic,predictionMarketTopic
+        const task13Result = await taskFun(
+            "1.3判断是否包含预测市场话题",
+            "/generate_tweet/1/3",
+            param13
+        );
         //2.1
         const task21Title = "第二次搜索（英文搜索内容，支持话题提取）";
         const task21Payload = {
@@ -1017,43 +1017,62 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             title: task21Title, // 动态生成标题
             jsonData: task21Result.res,
         };
-        //2.2提取话题
-        const task22Title = "提取话题";
-        const task22Payload = {
-            summary: task2Result.data.summary,
-            title: task2Result.data.title,
-            model,
-            search: JSON.stringify(task121Result.data.results),
-            // topic: task2Result.data.title,
-        };
-        const task22Id = await startTask("/generate_tweet/2/2", task22Payload);
-        const task22Result = await waitForTaskCompletion(task22Id);
-        const task22Step = {
-            title: task22Title, // 动态生成标题
-            jsonData: task22Result.res,
-        };
-        //2.3  话题评估
-        const param23 = {
-            reason: JSON.stringify(task22Result.data.topics),
-            summary: task2Result.data.summary,
-            title: task2Result.data.title,
-        };
-        const task23Result = await taskFun(
-            "2.3提取话题",
-            "/generate_tweet/2/3",
-            param23
-        );
+        let task24Result = null;
+        if (task13Result.data.predictionMarketTopic === "false") {
+            //2.2提取话题
+            const task22Title = "提取话题";
+            const task22Payload = {
+                summary: task2Result.data.summary,
+                title: task2Result.data.title,
+                model,
+                search: JSON.stringify(task21Result.data.results),
+                // topic: task2Result.data.title,
+            };
+            const task22Id = await startTask(
+                "/generate_tweet/2/2",
+                task22Payload
+            );
+            const task22Result = await waitForTaskCompletion(task22Id);
+            const task22Step = {
+                title: task22Title, // 动态生成标题
+                jsonData: task22Result.res,
+                input: task22Payload,
+            };
+            setSteps((prevSteps) => [...prevSteps, task22Step]);
 
-        //2.4  话题评估
-        const param24 = {
-            evaluation: JSON.stringify(task23Result.data),
-        };
-        const task24Result = await taskFun(
-            "2.4话题评估",
-            "/generate_tweet/2/4",
-            param24
-        );
-
+            //2.3  话题评估
+            const param23 = {
+                reason: JSON.stringify(task22Result.data.topics),
+                summary: task2Result.data.summary,
+                title: task2Result.data.title,
+            };
+            const task23Result = await taskFun(
+                "2.3提取话题",
+                "/generate_tweet/2/3",
+                param23
+            );
+            //2.4  话题评估
+            const param24 = {
+                evaluation: JSON.stringify(task23Result.data),
+            };
+            task24Result = await taskFun(
+                "2.4话题评估",
+                "/generate_tweet/2/4",
+                param24
+            );
+        } else {
+            const param221 = {
+                model,
+                search: JSON.stringify(task21Result.data.results),
+                topic: task13Result.data.predictionMarketTopic,
+            };
+            //2.2.1 = 22b为已经包含的预测市场问题选择搜索时间范围
+            task24Result = await taskFun(
+                "2.2.1为已经包含的预测市场问题选择搜索时间范围",
+                "/generate_tweet/2/2/1",
+                param221
+            );
+        }
         //2.5  话题搜索
         const param25 = {
             text: JSON.stringify({
