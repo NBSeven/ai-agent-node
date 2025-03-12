@@ -1255,6 +1255,7 @@ export const handleAddStepLN = async (inputValue: string) => {
             result2: JSON.stringify(task4322Result.data),
             result3: JSON.stringify(task4323Result.data),
             topic: task26Result.data.topic,
+            search: JSON.stringify(task33Result.data)
         };
         const task44Id = await startTask("/generate_tweet/4/4", task44Payload);
         const task44Result = await waitForTaskCompletion(task44Id);
