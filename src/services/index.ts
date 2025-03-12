@@ -929,70 +929,47 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
     }
 };
 
-export const handleAddStepLN = async (inputValue: string, summary: string) => {
-    if (!summary) {
-        return "请输入summary";
-    }
+export const handleAddStepLN = async (inputValue: string) => {
+    
     if (!inputValue) {
         return "请输入title";
     }
 
     try {
         // 1.1 多语言处理
-        const param111 = {
+        const param0 = {
             text: inputValue,
             model,
         };
-        const task111Result = await taskFun(
-            "1.1.1原始语言搜索",
-            "/ai/tavily/search",
-            param111
+
+        const task0Result = await taskFun(
+            "0 提炼title",
+            "/generate_tweet/0",
+            param0
         );
-        const task1Title = "1.1.2翻译";
-        const task1Payload = {
-            text: inputValue,
-            model,
-            search: JSON.stringify(task111Result.data.results),
-        }; //
-        const task1Id = await startTask("ai/translate", task1Payload);
-        const task1Result = await waitForTaskCompletion(task1Id);
-        const task1Step = {
-            title: task1Title, // 动态生成标题
-            jsonData: task1Result.res,
-        };
-
-        // 第一次搜索（为翻译提供信息）
-        const task121Title = "第一次搜索（为翻译提供信息）";
-        const task121Payload = {
-            text: task1Result.data.topic,
+        const param11 = {
+            text: task0Result.data.title, // 提炼的title,
             model,
         };
-        const task121Id = await startTask("/ai/tavily/search", task121Payload);
-        const task121Result = await waitForTaskCompletion(task121Id);
-        const task121Step = {
-            title: task121Title, // 动态生成标题
-            jsonData: task121Result.res,
-        };
-
+        const task11Result = await taskFun(
+            "1.1 第一次搜索（为翻译提供信息）",
+            "/ai/tavily/search",
+            param11
+        );
         //1.2 翻译
         const task2Title = "1.2 翻译";
         const task2Payload = {
-            search: JSON.stringify(task121Result.data.results),
+            search: JSON.stringify(task11Result.data.results),
             model,
-            summary,
-            title: inputValue,
+            summary: task0Result.data["detailed content"],
+            title: task0Result.data.title,
         };
         const task2Id = await startTask("/generate_tweet/1/2", task2Payload);
         const task2Result = await waitForTaskCompletion(task2Id);
-        const task2Step = {
-            title: task2Title, // 动态生成标题
-            jsonData: task2Result.res,
-        };
-
 
         //1.3判断是否包含预测市场话题
         const param13 = {
-            summary: task2Result.data.summary,
+            summary: task0Result.data["detailed content"],
             title: task2Result.data.title,
             model,
         };
@@ -1022,7 +999,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             //2.2提取话题
             const task22Title = "提取话题";
             const task22Payload = {
-                summary: task2Result.data.summary,
+                summary: task0Result.data["detailed content"],
                 title: task2Result.data.title,
                 model,
                 search: JSON.stringify(task21Result.data.results),
@@ -1041,7 +1018,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             //2.3  话题评估
             const param23 = {
                 reason: JSON.stringify(task22Result.data.topics),
-                summary: task2Result.data.summary,
+                summary: task0Result.data["detailed content"],
                 title: task2Result.data.title,
             };
             const task23Result = await taskFun(
@@ -1052,7 +1029,7 @@ export const handleAddStepLN = async (inputValue: string, summary: string) => {
             //2.4  话题评估
             const param24 = {
                 evaluation: JSON.stringify(task23Result.data),
-                summary: task2Result.data.summary,
+                summary: task0Result.data["detailed content"],
             };
             task24Result = await taskFun(
                 "2.4话题评估",
