@@ -260,8 +260,9 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
         //1.2 类型判别
         const task2Title = "1.2 类型判别";
         const task2Payload = {
-            text: task1Result.data.topic,
+            topic: task1Result.data.topic,
             model,
+            search: JSON.stringify(task121Result.data.results),
         };
         const task2Id = await startTask("/ai/predict", task2Payload);
         const task2Result = await waitForTaskCompletion(task2Id);
@@ -289,6 +290,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task4Payload = {
                 topic: task1Result.data.topic,
                 model,
+                search: JSON.stringify(task121Result.data.results),
             };
             const task4Id = await startTask("/ai/reply/simple", task4Payload);
             const task4Result = await waitForTaskCompletion(task4Id);
@@ -358,11 +360,8 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 entities: JSON.stringify(
                     task6Result.data.suspected_fictional_entities
                 ),
-                //{1.4.1的搜索结果}，{1.4.2.2实体搜索结果}
-                search: JSON.stringify([
-                    ...task5Result.data.results,
-                    ...task1422Result.data.results,
-                ]),
+                search: JSON.stringify(task5Result.data.results),//{1.4.1的搜索结果}，
+                result: JSON.stringify(task1422Result.data.results),//{1.4.2.2实体搜索结果}
                 model,
             };
             const task7Id = await startTask("/ai/prompt/1422", task7Payload);
@@ -410,6 +409,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     const task4Payload = {
                         topic: task1Result.data.topic,
                         model,
+                        search: JSON.stringify(task121Result.data.results),
                     };
                     const task4Id = await startTask("/ai/reply/simple", task4Payload);
                     const task4Result = await waitForTaskCompletion(task4Id);
@@ -559,23 +559,52 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                         result: task14Step
                     }
                 } else {
-                    //1.4.9 回复生成 type_b
-                    const task14Title = "1.4.9 回复生成 type_b";
-                    debugger;
-                    const task14Payload = {
-                        // type: 2,
-                        // revised_topic: task8Result.data.topic,
-                        // revised_topic: task12Result.data.revised_topic,
-                        // result: task13Result.data,
-                        text: task1Result.data.topic,
+                    //1.4.9使用向量数据库增强
+                    // 1.4.9.1 查询Rootdata数据库
+                    const param1491 = {
+                        entity: JSON.stringify(task6Result.data.entities),
                         model,
-                        topic: task12Result.data.revised_topic,
-                        search: JSON.stringify([
-                            ...dateres147.data.results,
-                            ...dateres.data.results,
-                        ]),
                     };
-                    const task14Id = await startTask("/ai/tavily/reply", task14Payload);
+                    const task1491Result = await taskFun(
+                        "1.4.9.1 查询Rootdata数据库",
+                        "/ai/web3/extract",
+                        param1491
+                    );
+
+                    // 1.4.9.2 提取web3相关问题
+                    const param1492 = {
+                        topic: task12Result.data.revised_topic,
+                        search: JSON.stringify(dateres147.data.results),
+                        model,
+                    };
+                    const task1492Result = await taskFun(
+                        "1.4.9.2 提取web3相关问题",
+                        "/ai/web3/related",
+                        param1492
+                    );
+
+                    //  1.4.9.3查询News api
+                    const param1493 = {
+                        topic: JSON.stringify(task1492Result.data.topicQuestions),
+                        model,
+                    };
+                    const task1493Result = await taskFun(
+                        " 1.4.9.3查询News api",
+                        "/ai/web3/dictionary",
+                        param1493
+                    );
+
+                    //1.4.10 生成长文
+                    const task14Title = "1.4.10 生成长文";
+                    const task14Payload = {
+                        text: task1Result.data.topic, // 原始推特信息
+                        model,
+                        result1: JSON.stringify(task1491Result.data), //1.4.9.1 查询Rootdata数据库的结果
+                        result2: JSON.stringify(task1493Result.data), //1.4.9.3查询News api的结果
+                        optimize_result: JSON.stringify(task12Result.data), //1.4.6 第二次优化结果中的 “revised_topic” 和 "revised_date"
+                        search_result: JSON.stringify(dateres147.data.results), // 1.4.7第三次搜索结果
+                    };
+                    const task14Id = await startTask("/ai/web3/generate", task14Payload);
                     const task14Result = await waitForTaskCompletion(task14Id);
                     const task14Step = {
                         title: task14Title,
@@ -675,8 +704,9 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
         //1.2 类型判别
         const task2Title = "1.2 类型判别";
         const task2Payload = {
-            text: task1Result.data.topic,
+            topic: task1Result.data.topic,
             model,
+            search: JSON.stringify(task121Result.data.results),
         };
         const task2Id = await startTask("/ai/predict", task2Payload);
         const task2Result = await waitForTaskCompletion(task2Id);
@@ -746,11 +776,8 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
                 entities: JSON.stringify(
                     task6Result.data.suspected_fictional_entities
                 ),
-                //{1.4.1的搜索结果}，{1.4.2.2实体搜索结果}
-                search: JSON.stringify([
-                    ...task5Result.data.results,
-                    ...task1422Result.data.results,
-                ]),
+                search: JSON.stringify(task5Result.data.results),//{1.4.1的搜索结果}，
+                result: JSON.stringify(task1422Result.data.results),//{1.4.2.2实体搜索结果}
                 model,
             };
             const task7Id = await startTask("/ai/prompt/1422", task7Payload);
@@ -930,7 +957,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
 };
 
 export const handleAddStepLN = async (inputValue: string) => {
-    
+
     if (!inputValue) {
         return "请输入title";
     }
