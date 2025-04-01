@@ -1144,7 +1144,9 @@ export const handleAddStepLN = async (inputValue: string) => {
             const param221 = {
                 model,
                 search: JSON.stringify(task21Result.data.results),
-                topic: task13Result.data.predictionMarketTopic,
+                // topic: task13Result.data.predictionMarketTopic,
+                topic: task2Result.data["detailed content"]
+
             };
             //2.2.1 = 22b为已经包含的预测市场问题选择搜索时间范围
             task24Result = await taskFun(
