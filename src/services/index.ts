@@ -242,6 +242,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
         const task1Step = {
             title: task1Title, // 动态生成标题
             jsonData: task1Result.res,
+            input: task1Payload,
         };
 
         // 类别判断加入前置搜索
@@ -255,6 +256,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
         const task121Step = {
             title: task121Title, // 动态生成标题
             jsonData: task121Result.res,
+            input: task121Payload,
         };
 
         //1.2 类型判别
@@ -269,21 +271,23 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
         const task2Step = {
             title: task2Title, // 动态生成标题
             jsonData: task2Result.res,
+            input: task2Payload,
         };
 
         // 1.3 非预测市场话题回复生成
         if (task2Result.data.valuable === false) {
             // const task3Title = "1.3.1，使用 tavily 搜索前 10 条内容";
             // const task3Payload = {
-            //     text: task1Result.data.topic,
-            //     model,
+            //   text: task1Result.data.topic,
+            //   model,
             // };
             // const task3Id = await startTask("/ai/tavily/search", task3Payload);
             // const task3Result = await waitForTaskCompletion(task3Id);
             // const task3Step = {
-            //     title: task3Title, // 动态生成标题
-            //     jsonData: task3Result.res,
+            //   title: task3Title, // 动态生成标题
+            //   jsonData: task3Result.res,
             // };
+            // setSteps((prevSteps) => [...prevSteps, task3Step]);
 
             // 1.3.1 非预测市场话题回复生成
             const task4Title = "1.3.1 非预测市场话题回复生成";
@@ -297,8 +301,8 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task4Step = {
                 title: task4Title, // 动态生成标题
                 jsonData: task4Result.res,
+                input: task4Payload,
             };
-            debugger;
             // 返回结果
             return {
                 result: task4Step
@@ -317,6 +321,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task5Step = {
                 title: task5Title,
                 jsonData: task5Result.res,
+                input: task5Payload,
             };
 
             // 1.4.2 第一次判别 1.4.2.1 识别实体
@@ -324,7 +329,6 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task6Payload = {
                 topic:
                     task2Result.data.selected_topic || task2Result.data.seleted_topic,
-                search: JSON.stringify(task5Result.data.results),
                 model,
             };
             const task6Id = await startTask("/ai/prompt/1421", task6Payload);
@@ -332,6 +336,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task6Step = {
                 title: task6Title,
                 jsonData: task6Result.res,
+                input: task6Payload,
             };
 
             // 1.4.2.2 识别实体后搜索，使用 tavily 搜索前 10 条内容
@@ -349,32 +354,32 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
             const task1422Step = {
                 title: task1422Title,
                 jsonData: task1422Result.res,
+                input: task1422Payload,
             };
 
             //1.4.2.3 实体虚构判断
             const task7Title = " 1.4.2.3 实体虚构判断";
-            debugger;
 
             const task7Payload = {
                 // entities: JSON.stringify(task6Result.data.entities),
                 entities: JSON.stringify(
                     task6Result.data.suspected_fictional_entities
                 ),
-                search: JSON.stringify(task5Result.data.results),//{1.4.1的搜索结果}，
-                result: JSON.stringify(task1422Result.data.results),//{1.4.2.2实体搜索结果}
+                search: JSON.stringify(task5Result.data.results), //{1.4.1的搜索结果}，
                 model,
+                result: JSON.stringify(task1422Result.data.results), //{1.4.2.2实体搜索结果}
             };
             const task7Id = await startTask("/ai/prompt/1422", task7Payload);
             const task7Result = await waitForTaskCompletion(task7Id);
             const task7Step = {
                 title: task7Title,
                 jsonData: task7Result.res,
+                input: task7Payload,
             };
-            debugger;
             // 如果 JSON 中的 “if_contains” 为 No，则继续后续流程
             if (task7Result.data.if_contains === "No") {
                 //1.4.3  第一次问题优化
-                const task8Title = " 1.4.3第一次问题优化";
+                const task8Title = " 1.4.3.1第一次问题优化";
                 const task8Payload = {
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
@@ -383,27 +388,24 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 };
                 const task8Id = await startTask("/ai/reply/optimize", task8Payload);
                 const task8Result = await waitForTaskCompletion(task8Id);
-                debugger;
                 const task8Step = {
                     title: task8Title,
                     jsonData: task8Result.res,
+                    input: task8Payload,
                 };
-
-
-
-                //1.4.3.1差异过大话题判断逻辑
+                //1.4.3.2差异过大话题判断逻辑
                 const param1431 = {
-                    result: JSON.stringify(task8Result.data),
-                    topic:
-                        task2Result.data.selected_topic || task2Result.data.seleted_topic,
+                    result: JSON.stringify(task8Result.data.topic),
+                    topic: task1Result.data.topic,
                 };
                 const task1431Result = await taskFun(
-                    "1.4.3.1差异过大话题判断逻辑",
+                    "1.4.3.2差异过大话题判断逻辑",
                     "/ai/analysis/diff",
                     param1431
                 );
-
-                if (task1431Result.data["Large Difference"] === "true") {
+                // - 如果 JSON 结果中 “verdict” 为 “Not Divergent”，则继续后续步骤
+                // - 如果 JSON 结果中 “verdict” 为 “Overly Divergent”， 则跳转1.3.1
+                if (task1431Result.data["verdict"] === "Overly Divergent") {
                     // 1.3.1 非预测市场话题回复生成
                     const task4Title = "1.3.1 非预测市场话题回复生成";
                     const task4Payload = {
@@ -416,15 +418,15 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     const task4Step = {
                         title: task4Title, // 动态生成标题
                         jsonData: task4Result.res,
+                        input: task4Payload,
                     };
+
+                    //返回结果
                     return {
                         result: task4Step
                     }
                 }
-
-
                 //1.4.4 关键词生成
-                debugger;
                 const task11Title = "1.4.4 关键词生成";
                 const task11Payload = {
                     topic: task8Result.data.topic,
@@ -435,8 +437,8 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 const task11Step = {
                     title: task11Title,
                     jsonData: task11Result.res,
+                    input: task11Payload,
                 };
-
 
                 //1.4.5 第二次搜索
                 const keys1 = task11Result.data.keys1 || [];
@@ -471,8 +473,8 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 const task12Payload = {
                     result1: JSON.stringify(searchRes),
                     result2: JSON.stringify(dateres.data.results),
-                    model,
                     // log: JSON.stringify(task8Result.data.log),
+                    model,
                     topic:
                         task2Result.data.selected_topic || task2Result.data.seleted_topic,
                 };
@@ -486,11 +488,12 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 const task12Step = {
                     title: task12Title,
                     jsonData: task12Result.res,
+                    input: task12Payload,
                 };
 
 
                 //1.4.7 二次问题优化后的第三次搜索
-                debugger;
+
                 const dateres147: any = await tavilySearch(
                     "1.4.7 二次问题优化后的第三次搜索",
                     // JSON.stringify(task12Result.res)
@@ -514,7 +517,9 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 const task13Step = {
                     title: task13Title,
                     jsonData: task13Result.res,
+                    input: task13Payload,
                 };
+
                 //1.4.8.1 第二次审查
                 const param1481 = {
                     search_result: JSON.stringify(dateres147.data.results),
@@ -529,10 +534,6 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
 
                 const { evaluation_1, evaluation_2, evaluation_3 } =
                     task1481Result.data;
-
-                // - 根据上面的 JSON 结果中的 “evaluation_1” , “evaluation_2” 和 “evaluation_3” 进行判断：
-                // - 其中有一个为 "Yes" 或者都为 "Yes" 则跳转1.5.2
-                // - 都为 "No" 则输出 "justification" 并跳转1.4.8
                 if (
                     evaluation_1 === "Yes" ||
                     evaluation_2 === "Yes" ||
@@ -553,6 +554,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     const task14Step = {
                         title: task14Title,
                         jsonData: task14Result.res,
+                        input: task14Payload,
                     };
                     //返回结果
                     return {
@@ -561,16 +563,41 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 } else {
                     //1.4.9使用向量数据库增强
                     // 1.4.9.1 查询Rootdata数据库
-                    const param1491 = {
-                        entity: JSON.stringify(task6Result.data.entities),
-                        model,
-                    };
-                    const task1491Result = await taskFun(
-                        "1.4.9.1 查询Rootdata数据库",
-                        "/ai/web3/extract",
-                        param1491
+                    // "[\"Pendle\",\"Boros\"]" 单个查询
+                    // const param1491 = {
+                    //   entity: JSON.stringify(task6Result.data.entities),
+                    //   model,
+                    // };
+                    // const task1491Result = await taskFun(
+                    //   "1.4.9.1 查询Rootdata数据库",
+                    //   "/ai/web3/extract",
+                    //   param1491
+                    // );
+                    const taskList1491 = task6Result.data.entities.map(
+                        (entity: string) => {
+                            const param = {
+                                entity,
+                                model,
+                            };
+                            return taskFun(
+                                `1.4.9.1 查询Rootdata数据库${entity}`,
+                                "/ai/web3/extract",
+                                param
+                            );
+                        }
                     );
+                    const taskList1491Result: any = [];
+                    await (async () => {
+                        try {
+                            for await (const item of taskList1491) {
+                                console.log(item, "1.4.9.1 查询Rootdata数据库 item push");
 
+                                taskList1491Result.push(item.data);
+                            }
+                        } catch (error) {
+                            console.error("Error:", error);
+                        }
+                    })();
                     // 1.4.9.2 提取web3相关问题
                     const param1492 = {
                         topic: task12Result.data.revised_topic,
@@ -582,36 +609,85 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                         "/ai/web3/related",
                         param1492
                     );
-
-                    //  1.4.9.3查询News api
-                    const param1493 = {
-                        topic: JSON.stringify(task1492Result.data.topicQuestions),
-                        model,
-                    };
-                    const task1493Result = await taskFun(
-                        " 1.4.9.3查询News api",
-                        "/ai/web3/dictionary",
-                        param1493
+                    debugger
+                    const taskList1493Result: any = [];
+                    const { keywords } =
+                        task1492Result.data;
+                    const taskList1493Keywords = keywords.map(
+                        (topic: string) => {
+                            const param = {
+                                topic,
+                                model,
+                            };
+                            return taskFun(
+                                `1.4.9.3查询News api keywords:${topic}`,
+                                "/ai/web3/dictionary",
+                                param
+                            );
+                        }
                     );
+                    await (async () => {
+                        try {
+                            for await (const item of taskList1493Keywords) {
+                                console.log(
+                                    item,
+                                    "1.4.9.3查询News api keywords item push"
+                                );
+
+                                taskList1493Result.push(item.data);
+                            }
+                        } catch (error) {
+                            console.error("Error:", error);
+                        }
+                    })();
+
+                    debugger;
+                    //  1.4.9.3查询News api
+                    // const param1493 = {
+                    //   topic: JSON.stringify(task1492Result.data.topicQuestions),
+                    //   model,
+                    // };
+                    // const task1493Result = await taskFun(
+                    //   " 1.4.9.3查询News api",
+                    //   "/ai/web3/dictionary",
+                    //   param1493
+                    // );
 
                     //1.4.10 生成长文
                     const task14Title = "1.4.10 生成长文";
                     const task14Payload = {
                         text: task1Result.data.topic, // 原始推特信息
                         model,
-                        result1: JSON.stringify(task1491Result.data), //1.4.9.1 查询Rootdata数据库的结果
-                        result2: JSON.stringify(task1493Result.data), //1.4.9.3查询News api的结果
+                        result1: JSON.stringify(taskList1491Result), //1.4.9.1 查询Rootdata数据库的结果
+                        result2: JSON.stringify(taskList1493Result), //1.4.9.3查询News api的结果
                         optimize_result: JSON.stringify(task12Result.data), //1.4.6 第二次优化结果中的 “revised_topic” 和 "revised_date"
                         search_result: JSON.stringify(dateres147.data.results), // 1.4.7第三次搜索结果
                     };
-                    const task14Id = await startTask("/ai/web3/generate", task14Payload);
+                    const task14Id = await startTask(
+                        "/ai/web3/generate",
+                        task14Payload
+                    );
                     const task14Result = await waitForTaskCompletion(task14Id);
                     const task14Step = {
                         title: task14Title,
                         jsonData: task14Result.res,
+                        input: task14Payload,
                     };
 
-                    let rt = await renderText(task14Result.data, inputValue, type);
+                    // 1.4.11 总结长文为回复
+                    const param14911 = {
+                        text: task1Result.data.topic,
+                        result: JSON.stringify(task14Result.data),
+                        optimize_result: JSON.stringify(task12Result.data),
+                        model,
+                    };
+                    const task14911Result = await taskFun(
+                        "1.4.11 总结长文为回复",
+                        "/ai/tavily/reply",
+                        param14911
+                    );
+
+                    let rt = await renderText(task14911Result.data, inputValue, type);
 
                     ////返回结果
                     return {
@@ -635,6 +711,7 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                 const task16Step = {
                     title: task16Title,
                     jsonData: task16Result.res,
+                    input: task16Payload,
                 };
                 let rt1 = await renderText(task16Result.data, inputValue);
                 console.log(rt1, '渲染完成')
