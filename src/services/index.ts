@@ -394,38 +394,38 @@ export const handleAddStep = async (inputValue: string, type = 1) => {
                     input: task8Payload,
                 };
                 //1.4.3.2差异过大话题判断逻辑
-                const param1431 = {
-                    result: JSON.stringify(task8Result.data.topic),
-                    topic: task1Result.data.topic,
-                };
-                const task1431Result = await taskFun(
-                    "1.4.3.2差异过大话题判断逻辑",
-                    "/ai/analysis/diff",
-                    param1431
-                );
-                // - 如果 JSON 结果中 “verdict” 为 “Not Divergent”，则继续后续步骤
-                // - 如果 JSON 结果中 “verdict” 为 “Overly Divergent”， 则跳转1.3.1
-                if (task1431Result.data["verdict"] === "Overly Divergent") {
-                    // 1.3.1 非预测市场话题回复生成
-                    const task4Title = "1.3.1 非预测市场话题回复生成";
-                    const task4Payload = {
-                        topic: task1Result.data.topic,
-                        model,
-                        search: JSON.stringify(task121Result.data.results),
-                    };
-                    const task4Id = await startTask("/ai/reply/simple", task4Payload);
-                    const task4Result = await waitForTaskCompletion(task4Id);
-                    const task4Step = {
-                        title: task4Title, // 动态生成标题
-                        jsonData: task4Result.res,
-                        input: task4Payload,
-                    };
+                // const param1431 = {
+                //     result: JSON.stringify(task8Result.data.topic),
+                //     topic: task1Result.data.topic,
+                // };
+                // const task1431Result = await taskFun(
+                //     "1.4.3.2差异过大话题判断逻辑",
+                //     "/ai/analysis/diff",
+                //     param1431
+                // );
+                // // - 如果 JSON 结果中 “verdict” 为 “Not Divergent”，则继续后续步骤
+                // // - 如果 JSON 结果中 “verdict” 为 “Overly Divergent”， 则跳转1.3.1
+                // if (task1431Result.data["verdict"] === "Overly Divergent") {
+                //     // 1.3.1 非预测市场话题回复生成
+                //     const task4Title = "1.3.1 非预测市场话题回复生成";
+                //     const task4Payload = {
+                //         topic: task1Result.data.topic,
+                //         model,
+                //         search: JSON.stringify(task121Result.data.results),
+                //     };
+                //     const task4Id = await startTask("/ai/reply/simple", task4Payload);
+                //     const task4Result = await waitForTaskCompletion(task4Id);
+                //     const task4Step = {
+                //         title: task4Title, // 动态生成标题
+                //         jsonData: task4Result.res,
+                //         input: task4Payload,
+                //     };
 
-                    //返回结果
-                    return {
-                        result: task4Step
-                    }
-                }
+                //     //返回结果
+                //     return {
+                //         result: task4Step
+                //     }
+                // }
                 //1.4.4 关键词生成
                 const task11Title = "1.4.4 关键词生成";
                 const task11Payload = {
