@@ -52,6 +52,7 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
         return data.task_id; // 假设任务 ID 存在于 data.taskId
     } catch (error: any) {
         console.log(error)
+        console.log(path, JSON.stringify(taskPayload))
         throw new Error(`startTask: ${error.toString()},${taskPayload}`);
     }
 
@@ -171,7 +172,7 @@ const renderText = async (data: any, twitter: string, type = 1) => {
         type,
         twitter: twitter,
     };
-    const render31Id = await startTask("/ai/style/render", render31Payload);
+    const render31Id = await startTask("/ai/2", render31Payload);
     const render31Result = await waitForTaskCompletion(render31Id);
     const render31Step = {
         title: render31Title,
