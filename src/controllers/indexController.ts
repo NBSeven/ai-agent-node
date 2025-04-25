@@ -4,8 +4,8 @@ import { handleAddStep, handleAddStepL, handleAddStepLN } from '../services/inde
 
 
 export const t = async (ctx: Context) => {
-    const { text, type }: any = ctx.request.body;
-    const res = await handleAddStep(text, type);
+    const { text, type, username}: any = ctx.request.body;
+    const res = await handleAddStep(text, type, username);
     ctx.body = { message: res };
 };
 
