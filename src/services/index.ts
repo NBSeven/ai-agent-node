@@ -329,6 +329,10 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                 jsonData: task4Result.res,
                 input: task4Payload,
             };
+            // 返回结果
+            return {
+                result: task4Step
+            }
         } else {
             // 1.4 类预测市场话题回复生成
             const task5Title =
@@ -588,6 +592,10 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                         jsonData: task14Result.res,
                         input: task14Payload,
                     };
+                    //返回结果
+                    return {
+                        result: task14Step
+                    }
                 } else {
                     //1.4.9使用向量数据库增强
                     // 1.4.9.1 查询Rootdata数据库
