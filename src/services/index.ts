@@ -216,6 +216,36 @@ function getRandom(...args: number[]) {
     return args[Math.floor(Math.random() * args.length)];
 }
 
+function extractUrls(text: string) {
+    // 正则表达式匹配以 http/https 开头，直到遇到空格、逗号或字符串结束
+    const urlRegex = /https?:\/\/[^\s,]+/gi;
+    return text.match(urlRegex) || [];
+}
+
+async function resolveShortUrls(content: string): Promise<string[]> {
+    // 1. 提取 URL
+    const matches = extractUrls(content) || [];
+    const uniqueUrls = [...new Set(matches)];
+    // 2. 并发解析
+    const resolvedUrls = await Promise.all(
+        uniqueUrls.map(async (url) => {
+            const cleanUrl = url.replace(/[.,;!?]+$/, '');
+            try {
+                const response = await fetch(`${cleanUrl}`);
+                if (!response.ok) throw new Error('解析失败');
+                const { resolvedUrl } = await response.json();
+                return resolvedUrl;
+            } catch (error) {
+                console.error(`解析失败: ${cleanUrl}`, error);
+                return cleanUrl; // 返回原始链接作为 fallback
+            }
+        })
+    );
+    return resolvedUrls
+}
+
+
+
 export const handleAddStep = async (inputValue: string, type = 1, username = '') => {
     if (!inputValue) {
         return "请输入描述内容";
@@ -313,8 +343,7 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
             //   title: task3Title, // 动态生成标题
             //   jsonData: task3Result.res,
             // };
-            // setSteps((prevSteps) => [...prevSteps, task3Step]);
-
+            // 
             // 1.3.1 非预测市场话题回复生成
             const task4Title = "1.3.1 非预测市场话题回复生成";
             const task4Payload = {
@@ -1076,14 +1105,24 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
     }
 };
 
-export const handleAddStepLN = async (inputValue: string) => {
+export const handleAddStepLN = async (inputValue: string, username = '') => {
 
     if (!inputValue) {
         return "请输入title";
     }
-
+    // 获取polymarket相关的url
+    let includeUrl = false;
+    let purl = "";
+    const urls = await resolveShortUrls(inputValue);
+    const furls = urls.filter((url) =>
+        url.includes("https://polymarket.com/event")
+    );
+    if (furls.length > 0) {
+        includeUrl = true;
+        purl = furls[0]; //只获取一个
+    }
     try {
-        // 1.1 多语言处理
+
         const param0 = {
             text: inputValue,
             model,
@@ -1113,14 +1152,18 @@ export const handleAddStepLN = async (inputValue: string) => {
         };
         const task2Id = await startTask("/generate_tweet/1/2", task2Payload);
         const task2Result = await waitForTaskCompletion(task2Id);
+        const task2Step = {
+            title: task2Title, // 动态生成标题
+            jsonData: task2Result.res,
+            input: task2Payload,
+        };
 
         //1.3判断是否包含预测市场话题
         const param13 = {
-            summary: task0Result.data["detailed content"],
+            summary: task2Result.data["detailed content"],
             title: task2Result.data.title,
             model,
         };
-
         //"containsPredictionMarketTopic": "True or False", "predictionMarketTopic": "If containsPredictionMarketTopic is True, extract the prediction market topic from the input. If containsPredictionMarketTopic is False, return None."
         //如果{1.3的包含预测市场判断结果}为False，进入2.2，否则进入2.2.1
         //task13Result.data.containsPredictionMarketTopic,predictionMarketTopic
@@ -1140,13 +1183,14 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task21Step = {
             title: task21Title, // 动态生成标题
             jsonData: task21Result.res,
+            input: task21Payload,
         };
         let task24Result = null;
         if (task13Result.data.containsPredictionMarketTopic === "false") {
             //2.2提取话题
             const task22Title = "提取话题";
             const task22Payload = {
-                summary: task0Result.data["detailed content"],
+                summary: task2Result.data["detailed content"],
                 title: task2Result.data.title,
                 model,
                 search: JSON.stringify(task21Result.data.results),
@@ -1162,10 +1206,11 @@ export const handleAddStepLN = async (inputValue: string) => {
                 jsonData: task22Result.res,
                 input: task22Payload,
             };
+
             //2.3  话题评估
             const param23 = {
                 reason: JSON.stringify(task22Result.data.topics),
-                summary: task0Result.data["detailed content"],
+                summary: task2Result.data["detailed content"],
                 title: task2Result.data.title,
             };
             const task23Result = await taskFun(
@@ -1176,7 +1221,7 @@ export const handleAddStepLN = async (inputValue: string) => {
             //2.4  话题评估
             const param24 = {
                 evaluation: JSON.stringify(task23Result.data),
-                summary: task0Result.data["detailed content"],
+                summary: task2Result.data["detailed content"],
             };
             task24Result = await taskFun(
                 "2.4话题评估",
@@ -1188,16 +1233,16 @@ export const handleAddStepLN = async (inputValue: string) => {
                 model,
                 search: JSON.stringify(task21Result.data.results),
                 // topic: task13Result.data.predictionMarketTopic,
-                topic: task2Result.data["detailed content"]
-
+                topic: task2Result.data["detailed content"],
             };
             //2.2.1 = 22b为已经包含的预测市场问题选择搜索时间范围
             task24Result = await taskFun(
-                "2.2.1为已经包含的预测市场问题选择搜索时间范围",
-                "/generate_tweet/2/2/1",
+                "2.2.b为已经包含的预测市场问题选择搜索时间范围",
+                "/generate_tweet/2/2/b",
                 param221
             );
         }
+
         //2.5  话题搜索
         const param25 = {
             text: JSON.stringify({
@@ -1222,6 +1267,78 @@ export const handleAddStepLN = async (inputValue: string) => {
             param26
         );
 
+        const param271 = {
+            query: task26Result.data.topic,
+            user_name: username,
+            type: "2", // 1 短推 2 长推
+            model,
+        };
+        const task271Result = await taskFun(
+            "2.7.1搜索记忆",
+            "/ai/query_memory",
+            param271
+        );
+
+        const param272 = {
+            memory: JSON.stringify(task271Result.data),
+            model,
+            search: JSON.stringify(task25Result.data.results),
+            topic: task26Result.data.topic,
+        };
+
+        const task272Result = await taskFun(
+            "2.7.2判断是否继续",
+            "/generate_tweet/2/7/2",
+            param272
+        );
+        // task272Result
+        // case 1: same_user_input=false，update_content=false, 跳过2.7.3 阐明话题更新方向，进入3.关键词检索；后续在需要在进入4.2a 4.4a
+        // case 2: same_user_input=true, update_content=false, 返回“我们已经聊过这个话题了“,终止话题
+        // case 3: same_user_input=true, update_content=true, 进入2.7.3阐明话题更新方向，在后续步骤不进入'4.2a 4.4a'，而是需要进入4.2b 4.4b
+        // case 4: same_user_input=false， update_content=true，报错”这不是预期的组合“
+        let type = "";
+        const { same_user_input, update_content } = task272Result.data;
+        debugger;
+        if (same_user_input === "false" && update_content === "false") {
+            type = "a";
+        } else if (same_user_input === "true" && update_content === "false") {
+
+            const otherStep = {
+                title: "我们已经聊过这个话题了", // 动态生成标题
+                jsonData: "{}",
+                input: "",
+            }
+            return otherStep;
+        } else if (same_user_input === "true" && update_content === "true") {
+            type = "b";
+        } else if (same_user_input === "true" && update_content === "true") {
+            const otherStep = {
+                title: "这不是预期的组合", // 动态生成标题
+                jsonData: "{}",
+                input: "",
+            }
+            return otherStep;
+        }
+        debugger;
+        // 阐明话题更新方向
+        let task273Result = null;
+        if (type === "a") {
+        } else if (type === "b") {
+            const param273 = {
+                memory: JSON.stringify(task271Result.data),
+                model,
+                search: JSON.stringify(task272Result.data),
+                topic: task26Result.data.topic,
+            };
+
+            task273Result = await taskFun(
+                "2.7.3 阐明话题更新方向",
+                "/generate_tweet/2/7/3",
+                param273
+            );
+            console.log(task273Result);
+        }
+
         //3.1 关键词生成
         const task31Title = "3.1 关键词生成";
         const task31Payload = {
@@ -1233,6 +1350,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task31Step = {
             title: task31Title, // 动态生成标题
             jsonData: task31Result.res,
+            input: task31Payload,
         };
         //3.2 第三次搜索：关键词搜索
         const task32Title = "3.2 第三次搜索：关键词搜索";
@@ -1245,6 +1363,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task32Step = {
             title: task32Title, // 动态生成标题
             jsonData: task32Result.res,
+            input: task32Payload,
         };
         //3.3 关键词搜索结果总结和分析
         const task33Title = "3.3 关键词搜索结果总结和分析";
@@ -1259,6 +1378,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task33Step = {
             title: task33Title, // 动态生成标题
             jsonData: task33Result.res,
+            input: task33Payload,
         };
         //4.1 第四次搜索：对话题搜索
         const task41Title = "4.1 第四次搜索：对话题搜索";
@@ -1271,23 +1391,25 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task41Step = {
             title: task41Title, // 动态生成标题
             jsonData: task41Result.res,
+            input: task41Payload,
         };
         //4.2 对于话题进行提问
-        const task42Title = "4.2 对于话题进行提问";
-        const task42Payload = {
-            // keywords: task33Result.data.keywords,
-            keywords: JSON.stringify(task33Result.data),
-            model,
+        const param42ab: any = {
             reason: task26Result.data.reason,
-            search: JSON.stringify(task41Result.data.results),
             topic: task26Result.data.topic,
+            keywords: JSON.stringify(task33Result.data),
+            search: JSON.stringify(task41Result.data.results),
+            model,
         };
-        const task42Id = await startTask("/generate_tweet/4/2", task42Payload);
-        const task42Result = await waitForTaskCompletion(task42Id);
-        const task42Step = {
-            title: task42Title, // 动态生成标题
-            jsonData: task42Result.res,
-        };
+        if (task273Result) {
+            param42ab.result = JSON.stringify(task273Result.data);
+        }
+        const task42abResult = await taskFun(
+            `4.2${type}对于话题进行提问`,
+            `/generate_tweet/4/2/${type}`,
+            param42ab
+        );
+
         const {
             date_range_question_1,
             date_range_question_2,
@@ -1295,7 +1417,15 @@ export const handleAddStepLN = async (inputValue: string) => {
             question_1,
             question_2,
             question_3,
-        } = task42Result.data;
+        } = task42abResult.data;
+
+        //         长推更新
+        // - 增加流程{2.7 检索记忆数据库并且决策}
+        // - 增加流程{4.2b 对于话题进行提问}
+        // - 增加流程{4.4b大纲生成}
+        // - 增加流程{4.7记忆储存}
+        // - 增加流程{[确定数据来源前不需要工程更新]4.5.1生成预测市场的概率预测推文}
+
         //4.3.1 问题 i 的搜索(i=1,2,3)
         const task4311Title = "4.3.1 问题 1的搜索";
         const task4311Payload = {
@@ -1310,6 +1440,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task4311Step = {
             title: task4311Title, // 动态生成标题
             jsonData: task4311Result.res,
+            input: task4311Payload,
         };
 
         const task4312Title = "4.3.1 问题 2的搜索";
@@ -1325,6 +1456,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task4312Step = {
             title: task4312Title, // 动态生成标题
             jsonData: task4312Result.res,
+            input: task4312Payload,
         };
 
         const task4313Title = "4.3.1 问题 3的搜索";
@@ -1340,6 +1472,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task4313Step = {
             title: task4313Title, // 动态生成标题
             jsonData: task4313Result.res,
+            input: task4313Payload,
         };
 
         //4.3.2 对于问题i的搜索内容做总结
@@ -1358,6 +1491,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task4321Step = {
             title: task4321Title, // 动态生成标题
             jsonData: task4321Result.res,
+            input: task4321Payload,
         };
 
         //4.3.2 对于问题i的搜索内容做总结
@@ -1376,6 +1510,7 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task4322Step = {
             title: task4322Title, // 动态生成标题
             jsonData: task4322Result.res,
+            input: task4322Payload,
         };
 
         //4.3.2 对于问题i的搜索内容做总结
@@ -1394,23 +1529,32 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task4323Step = {
             title: task4323Title, // 动态生成标题
             jsonData: task4323Result.res,
+            input: task4323Payload,
         };
 
         //4.4大纲生成
-        const task44Title = "4.4大纲生成";
-        const task44Payload = {
+        const task44Title = `4.4${type}}大纲生成`;
+        const task44Payload: any = {
             model,
             result1: JSON.stringify(task4321Result.data),
             result2: JSON.stringify(task4322Result.data),
             result3: JSON.stringify(task4323Result.data),
             topic: task26Result.data.topic,
-            search: JSON.stringify(task33Result.data)
+            search: JSON.stringify(task33Result.data),
         };
-        const task44Id = await startTask("/generate_tweet/4/4", task44Payload);
+        if (task273Result) {
+            task44Payload.direction = task273Result.data;
+            debugger;
+        }
+        const task44Id = await startTask(
+            `/generate_tweet/4/4/${type}`,
+            task44Payload
+        );
         const task44Result = await waitForTaskCompletion(task44Id);
         const task44Step = {
             title: task44Title, // 动态生成标题
             jsonData: task44Result.res,
+            input: task44Payload,
         };
 
         //4.5 长推生成
@@ -1429,8 +1573,35 @@ export const handleAddStepLN = async (inputValue: string) => {
         const task45Step = {
             title: task45Title, // 动态生成标题
             jsonData: task45Result.res,
+            input: task45Payload,
         };
 
+        let task451Result: any = null;
+        let task452Result: any = null;
+        // 暂时写死url
+        if (includeUrl) {
+            const param451 = {
+                url: purl,
+            };
+            task451Result = await taskFun(
+                "4.5.1 爬取polymarket赔率数据",
+                "/generate_tweet/4/5/1",
+                param451
+            );
+
+            const param452 = {
+                data: JSON.stringify(task451Result.data),
+                model,
+                text: JSON.stringify(task45Result.data),
+                topic: task26Result.data.topic,
+            };
+
+            task452Result = await taskFun(
+                "4.5.2 生成预测市场的概率预测推文",
+                "/generate_tweet/4/5/2",
+                param452
+            );
+        }
         //4.6 风格渲染
         const task46Title = "4.6 风格渲染";
         const task46Payload = {
@@ -1440,10 +1611,18 @@ export const handleAddStepLN = async (inputValue: string) => {
         };
         const task46Id = await startTask("/generate_tweet/4/6", task46Payload);
         const task46Result = await waitForTaskCompletion(task46Id);
-        const task46Step = {
+
+        // 4.7 追加整合
+        if (task452Result) {
+            task46Result.data.tweet = task452Result.data.short_tweet;
+        }
+
+        const task46Step: any = {
             title: task46Title, // 动态生成标题
-            jsonData: task46Result.res,
+            jsonData: JSON.stringify(task46Result.data),
+            input: task46Payload,
         };
+
         console.log(task46Step, '渲染完成')
         return {
             result: task46Step
