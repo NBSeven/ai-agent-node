@@ -1298,8 +1298,12 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
         // case 4: same_user_input=false， update_content=true，报错”这不是预期的组合“
         let type = "";
         let { same_user_input, update_content } = task272Result.data;
-        same_user_input = JSON.stringify(same_user_input);
-        update_content = JSON.stringify(update_content);
+        if (typeof same_user_input === 'boolean') {
+            same_user_input = JSON.stringify(same_user_input);
+        }
+        if (typeof update_content === 'boolean') {
+            update_content = JSON.stringify(update_content);
+        }
         if (same_user_input === "false" && update_content === "false") {
             type = "a";
         } else if (same_user_input === "true" && update_content === "false") {
@@ -1321,6 +1325,8 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
             return otherStep;
         }
         debugger;
+        console.log(type, 'type')
+
         // 阐明话题更新方向
         let task273Result = null;
         if (type === "a") {
@@ -1631,13 +1637,13 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     } catch (error: any) {
         console.log(error, 'error')
 
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        // bot.sendMessage(chatId, error.toString())
+        //     .then(() => {
+        //         console.log('Message sent successfully');
+        //     })
+        //     .catch((error: any) => {
+        //         console.error('Error sending message:', error);
+        //     });
         return {
             error: error.toString()
         }
