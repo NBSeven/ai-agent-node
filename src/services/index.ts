@@ -1297,8 +1297,9 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
         // case 3: same_user_input=true, update_content=true, 进入2.7.3阐明话题更新方向，在后续步骤不进入'4.2a 4.4a'，而是需要进入4.2b 4.4b
         // case 4: same_user_input=false， update_content=true，报错”这不是预期的组合“
         let type = "";
-        const { same_user_input, update_content } = task272Result.data;
-        debugger;
+        let { same_user_input, update_content } = task272Result.data;
+        same_user_input = JSON.stringify(same_user_input);
+        update_content = JSON.stringify(update_content);
         if (same_user_input === "false" && update_content === "false") {
             type = "a";
         } else if (same_user_input === "true" && update_content === "false") {
