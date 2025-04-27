@@ -1637,13 +1637,13 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     } catch (error: any) {
         console.log(error, 'error')
 
-        // bot.sendMessage(chatId, error.toString())
-        //     .then(() => {
-        //         console.log('Message sent successfully');
-        //     })
-        //     .catch((error: any) => {
-        //         console.error('Error sending message:', error);
-        //     });
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error: any) => {
+                console.error('Error sending message:', error);
+            });
         return {
             error: error.toString()
         }
