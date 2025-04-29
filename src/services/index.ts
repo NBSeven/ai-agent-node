@@ -49,6 +49,11 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
             }
         );
         const data = await response.json();
+        // 如果startTask返回的taskid不存在就上报
+        if (!data.task_id) {
+            bot.sendMessage(chatId, path)
+            bot.sendMessage(chatId, JSON.stringify(taskPayload))
+        }
         return data.task_id; // 假设任务 ID 存在于 data.taskId
     } catch (error: any) {
         console.log(error)
