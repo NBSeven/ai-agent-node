@@ -1122,7 +1122,10 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     // 获取polymarket相关的url
     let includeUrl = false;
     let purl = "";
-    const urls = await resolveShortUrls(inputValue);
+    // 第一遍解析，因为推特的短链返回的可能还是一个短链
+    const urls1 = await resolveShortUrls(inputValue);
+    const urls1R = urls1.join(',')
+    const urls = await resolveShortUrls(urls1R);
     const furls = urls.filter((url) =>
         url.includes("https://polymarket.com/event")
     );
