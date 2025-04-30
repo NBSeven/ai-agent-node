@@ -1119,6 +1119,9 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     if (!inputValue) {
         return "请输入title";
     }
+    if (!username) {
+        return "请输入username";
+    }
     // 获取polymarket相关的url
     let includeUrl = false;
     let purl = "";
