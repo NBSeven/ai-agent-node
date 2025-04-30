@@ -280,15 +280,14 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
         }
 
         const task111Result = await taskFun(
-            "1.1.1原始语言搜索",
-            "/ai/tavily/search",
+            "1.1.1用户输入和背景信息整合",
+            "/ai/1/1/1",
             param111
         );
         const task1Title = "1.1.2翻译";
         const task1Payload = {
-            text: inputValue,
+            text: task111Result.data.combined_input,
             model,
-            search: JSON.stringify(task111Result.data.results),
         }; //
         const task1Id = await startTask("/ai/1/1/2", task1Payload);
         const task1Result = await waitForTaskCompletion(task1Id);
