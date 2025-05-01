@@ -1631,7 +1631,7 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
             search: JSON.stringify(task33Result.data),
         };
         if (task273Result) {
-            task44Payload.direction = task273Result.data;
+            task44Payload.direction = JSON.stringify(task273Result.data);
             debugger;
         }
         const task44Id = await startTask(
