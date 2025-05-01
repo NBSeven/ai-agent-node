@@ -186,6 +186,7 @@ const renderText = async (data: any, twitter: string, type = 1) => {
     const render31Step = {
         title: render31Title,
         jsonData: render31Result.res,
+        data: render31Result.data
     };
     return render31Step
 };
@@ -266,6 +267,19 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
             text: inputValue,
             model,
         };
+
+        const task02Result = await taskFun(
+            "02 垃圾信息筛查",
+            "/ai/0/2",
+            param111
+        );
+        //垃圾信息筛查结果
+        if (
+            task02Result.data.is_spam_or_ad === "true" ||
+            task02Result.data.is_spam_or_ad === true
+        ) {
+            return "";
+        }
         const task110Result = await taskFun(
             "1.1.0 用户输入安全性审查",
             "/ai/1/1/0",
@@ -367,6 +381,20 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                 jsonData: task4Result.res,
                 input: task4Payload,
             };
+
+            const pushMemoryParams = {
+                model,
+                query: JSON.stringify(task1Result.data.topic),
+                reply: task4Result.data.response.long_reply,
+                type: "1",
+                user_name: username,
+            };
+            const memoryResult = await taskFun(
+                "3.记忆储存",
+                "/ai/push_memory",
+                pushMemoryParams
+            );
+            console.log(memoryResult)
             // 返回结果
             return {
                 result: task4Step
@@ -631,6 +659,19 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                         input: task14Payload,
                     };
                     //返回结果
+                    const pushMemoryParams = {
+                        model,
+                        query: JSON.stringify(task1Result.data.topic),
+                        reply: task14Result.data,
+                        type: "1",
+                        user_name: username,
+                    };
+                    const memoryResult = await taskFun(
+                        "3.记忆储存",
+                        "/ai/push_memory",
+                        pushMemoryParams
+                    );
+                    console.log(memoryResult);
                     return {
                         result: task14Step
                     }
@@ -769,6 +810,19 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
 
                     let rt = await renderText(task14911Result.data, inputValue, type);
 
+                    const pushMemoryParams = {
+                        model,
+                        query: JSON.stringify(task1Result.data.topic),
+                        reply: rt.data,
+                        type: "1",
+                        user_name: username,
+                    };
+                    const memoryResult = await taskFun(
+                        "3.记忆储存",
+                        "/ai/push_memory",
+                        pushMemoryParams
+                    );
+                    console.log(memoryResult);
                     ////返回结果
                     return {
                         result: rt
@@ -794,6 +848,19 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                     input: task16Payload,
                 };
                 let rt1 = await renderText(task16Result.data, inputValue);
+                const pushMemoryParams = {
+                    model,
+                    query: JSON.stringify(task1Result.data.topic),
+                    reply: rt1.data,
+                    type: "1",
+                    user_name: username,
+                };
+                const memoryResult = await taskFun(
+                    "3.记忆储存",
+                    "/ai/push_memory",
+                    pushMemoryParams
+                );
+                console.log(memoryResult);
                 console.log(rt1, '渲染完成')
                 return {
                     result: rt1
@@ -1645,6 +1712,21 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
         };
 
         console.log(task46Step, '渲染完成')
+
+
+        const pushMemoryParams = {
+            model,
+            query: inputValue,
+            reply: task46Result.data,
+            type: "2",
+            user_name: username,
+        };
+        const memoryResult = await taskFun(
+            "4.8记忆储存",
+            "/ai/push_memory",
+            pushMemoryParams
+        );
+        console.log(memoryResult);
         return {
             result: task46Step
         }
