@@ -313,7 +313,7 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
 
         const param113 = {
             model,
-            query: inputValue,
+            query: task1Result.data.topic,
             type: "1", // 1 短推 2 长推
             user_name: username,
         };
