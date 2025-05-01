@@ -1717,7 +1717,7 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
         const pushMemoryParams = {
             model,
             query: inputValue,
-            reply: task46Result.data,
+            reply: JSON.stringify(task46Result.data),
             type: "2",
             user_name: username,
         };
