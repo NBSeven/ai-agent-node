@@ -663,7 +663,7 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                     const pushMemoryParams = {
                         model,
                         query: JSON.stringify(task1Result.data.topic),
-                        reply: task14Result.data,
+                        reply: JSON.stringify(task14Result.data),
                         type: "1",
                         user_name: username,
                     };
@@ -814,7 +814,7 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                     const pushMemoryParams = {
                         model,
                         query: JSON.stringify(task1Result.data.topic),
-                        reply: rt.data,
+                        reply: JSON.stringify(rt.data),
                         type: "1",
                         user_name: username,
                     };
@@ -852,7 +852,7 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
                 const pushMemoryParams = {
                     model,
                     query: JSON.stringify(task1Result.data.topic),
-                    reply: rt1.data,
+                    reply: JSON.stringify(rt1.data),
                     type: "1",
                     user_name: username,
                 };
