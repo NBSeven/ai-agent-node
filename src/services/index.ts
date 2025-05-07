@@ -59,6 +59,7 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
     } catch (error: any) {
         console.log(error)
         console.log(path, JSON.stringify(taskPayload))
+        bot.sendMessage(chatId, path)
         bot.sendMessage(chatId, error.toString())
         bot.sendMessage(chatId, JSON.stringify(taskPayload))
 
