@@ -242,7 +242,12 @@ async function resolveShortUrls(content: string): Promise<string[]> {
         uniqueUrls.map(async (url) => {
             const cleanUrl = url.replace(/[.,;!?]+$/, '');
             try {
-                const response = await fetch(`${cleanUrl}`);
+                const response = await fetch(`${cleanUrl}`, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    },
+                });
                 if (!response.ok) throw new Error('解析失败');
                 const { resolvedUrl } = await response.json();
                 return resolvedUrl;
@@ -1199,6 +1204,7 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     const furls = urls.filter((url) =>
         url.includes("https://polymarket.com/event")
     );
+    console.log(furls, 'furlsfurlsfurlsfurls')
     if (furls.length > 0) {
         includeUrl = true;
         purl = furls[0]; //只获取一个
