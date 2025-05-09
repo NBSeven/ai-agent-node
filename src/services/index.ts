@@ -1,4 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
+import axios from 'axios';
 
 const model = 'gpt-4o'
 const modelo1 = "gpt-o1";
@@ -237,20 +238,39 @@ async function resolveShortUrls(content: string): Promise<string[]> {
     // 1. 提取 URL
     const matches = extractUrls(content) || [];
     const uniqueUrls = [...new Set(matches)];
+    // 配置参数
+    const TIMEOUT = 5000;
     // 2. 并发解析
     const resolvedUrls = await Promise.all(
         uniqueUrls.map(async (url) => {
             const cleanUrl = url.replace(/[.,;!?]+$/, '');
             try {
-                const response = await fetch(`${cleanUrl}`, {
+                // const response = await fetch(`${cleanUrl}`, {
+                //     headers: {
+                //         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                //         'Accept-Language': 'en-US,en;q=0.9',
+                //     },
+                // });
+                // if (!response.ok) throw new Error('解析失败');
+                // const { resolvedUrl } = await response.json();
+                // return resolvedUrl;
+                const response = await axios.get(url, {
+                    maxRedirects: 0,       // 禁止自动重定向
+                    validateStatus: null,   // 允许所有状态码
+                    timeout: TIMEOUT,
                     headers: {
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                         'Accept-Language': 'en-US,en;q=0.9',
                     },
                 });
-                if (!response.ok) throw new Error('解析失败');
-                const { resolvedUrl } = await response.json();
-                return resolvedUrl;
+                // 解析重定向地址
+                if ([301, 302, 307, 308].includes(response.status)) {
+                    const redirectUrl = response.headers.location;
+                    return redirectUrl;
+                }
+
+                // 无重定向的直接返回
+                return url;
             } catch (error) {
                 console.error(`解析失败: ${cleanUrl}`, error);
                 return cleanUrl; // 返回原始链接作为 fallback
