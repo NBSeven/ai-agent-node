@@ -1404,36 +1404,37 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
         // case 2: same_user_input=true, update_content=false, 返回“我们已经聊过这个话题了“,终止话题
         // case 3: same_user_input=true, update_content=true, 进入2.7.3阐明话题更新方向，在后续步骤不进入'4.2a 4.4a'，而是需要进入4.2b 4.4b
         // case 4: same_user_input=false， update_content=true，报错”这不是预期的组合“
-        let type = "";
-        let { same_user_input, update_content } = task272Result.data;
-        if (typeof same_user_input === 'boolean') {
-            same_user_input = JSON.stringify(same_user_input);
-        }
-        if (typeof update_content === 'boolean') {
-            update_content = JSON.stringify(update_content);
-        }
-        if (same_user_input === "false" && update_content === "false") {
-            type = "a";
-        } else if (same_user_input === "true" && update_content === "false") {
+        // let type = "";
+        const type = "a"
+        // let { same_user_input, update_content } = task272Result.data;
+        // if (typeof same_user_input === 'boolean') {
+        //     same_user_input = JSON.stringify(same_user_input);
+        // }
+        // if (typeof update_content === 'boolean') {
+        //     update_content = JSON.stringify(update_content);
+        // }
+        // if (same_user_input === "false" && update_content === "false") {
+        //     type = "a";
+        // } else if (same_user_input === "true" && update_content === "false") {
 
-            const otherStep = {
-                title: "我们已经聊过这个话题了", // 动态生成标题
-                jsonData: "{}",
-                input: "",
-            }
-            return otherStep;
-        } else if (same_user_input === "true" && update_content === "true") {
-            type = "b";
-        } else if (same_user_input === "true" && update_content === "true") {
-            const otherStep = {
-                title: "这不是预期的组合", // 动态生成标题
-                jsonData: "{}",
-                input: "",
-            }
-            return otherStep;
-        }
-        debugger;
-        console.log(type, 'type')
+        //     const otherStep = {
+        //         title: "我们已经聊过这个话题了", // 动态生成标题
+        //         jsonData: "{}",
+        //         input: "",
+        //     }
+        //     return otherStep;
+        // } else if (same_user_input === "true" && update_content === "true") {
+        //     type = "b";
+        // } else if (same_user_input === "true" && update_content === "true") {
+        //     const otherStep = {
+        //         title: "这不是预期的组合", // 动态生成标题
+        //         jsonData: "{}",
+        //         input: "",
+        //     }
+        //     return otherStep;
+        // }
+        // debugger;
+        // console.log(type, 'type')
 
         // 阐明话题更新方向
         let task273Result = null;
