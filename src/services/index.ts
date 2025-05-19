@@ -314,10 +314,12 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
         console.log(task110Result, "task110Result");
         //如果返回为True，结束流程
         if (
-            task110Result.data["prompt injection attack detected"] !== "false"
+            task110Result.data["prompt injection attack detected"] === "true" ||
+            task110Result.data["prompt injection attack detected"] === true
         ) {
             return false;
         }
+
 
         const task111Result = await taskFun(
             "1.1.1用户输入和背景信息整合",
