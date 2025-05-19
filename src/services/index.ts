@@ -349,10 +349,20 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
             "/ai/query_memory",
             param113
         );
+
+        const param114 = {
+            model,
+            topic: task1Result.data.topic
+        };
+        const task114Result = await taskFun(
+            "1.1.4筛选信息",
+            "/ai/1/1/4",
+            param114
+        );
         // 类别判断加入前置搜索
         const task121Title = "1.2.1类别判断加入前置搜索";
         const task121Payload = {
-            text: task1Result.data.topic,
+            text: task114Result.data.summary,
             model,
         };
         const task121Id = await startTask("/ai/tavily/search", task121Payload);
