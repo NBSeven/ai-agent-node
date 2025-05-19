@@ -280,7 +280,11 @@ async function resolveShortUrls(content: string): Promise<string[]> {
     return resolvedUrls
 }
 
-
+function safeConvert(str: string) {
+    // 验证格式：可选符号开头、千分位数字、可选小数部分
+    if (!/^[-+]?(\d{1,3}(,\d{3})*(\.\d+)?|\.\d+)$/.test(str)) return Number(str);
+    return Number(str.replace(/,/g, ''));
+}
 
 export const handleAddStep = async (inputValue: string, type = 1, username = '') => {
     if (!inputValue) {
@@ -1773,6 +1777,145 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     } catch (error: any) {
         console.log(error, 'error')
 
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error: any) => {
+                console.error('Error sending message:', error);
+            });
+        return {
+            error: error.toString()
+        }
+    }
+};
+
+
+
+export const handleAddStepPre = async (inputValue: string, rules = '') => {
+    if (!inputValue) {
+        alert("请输入topic");
+        return;
+    }
+    if (!rules) {
+        alert("请输入rules");
+        return;
+    }
+    try {
+        // case
+        //   {
+        //     topic: "Will Trump issue an executive order on March 10?",
+        //     rules: "This market will resolve "Yes" if Donald Trump signs an executive order on March 10, 2025. Otherwise, this market will resolve to "No". Executive actions will not qualify toward this market’s resolution. This market will immediately resolve "Yes" if the text of an executive order for the given day is published on the White House page for presidential actions (https://www.whitehouse.gov/presidential-actions/) or the White House press pool. Mere announcements will not qualify. If no executive order is published by 12:00 PM ET the day after the listed date of this market, this market will resolve to “No”. In the case of ambiguity, this market will use the federal register as the resolution source (https://www.federalregister.gov/presidential-documents/executive-orders)."
+        // }
+        // 1.1 多语言处理
+        const param1 = {
+            rules: rules,
+            topic: inputValue,
+            model,
+        };
+        //1. 问题类型判断
+        const task1Result = await taskFun(
+            "1. 问题类型判断",
+            "/predict_agent/1",
+            param1
+        );
+
+        // {
+        //   "information_sources": {
+        //     "mentioned": "[Yes/No]",
+        //     "sources": "[List of specific sources if mentioned, otherwise 'None specified']",
+        //     "reasoning": "[Explanation of how the judgment was made]"
+        //   },
+        //   "data_from_internet": {
+        //     "is_internet_data": "[Yes/No]",
+        //     "reasoning": "[Explanation of whether the topic/rules involve data like GitHub stars, YouTube subscribers, Twitter followers, etc.]"
+        //   }
+        // }
+        const { data_from_internet } = task1Result.data;
+
+        if (data_from_internet.is_internet_data === "Yes") {
+            //2.1 抓取互联网数据
+            const param21 = {
+                topic: inputValue,
+                model,
+            };
+            const task1Result = await taskFun(
+                "2.1 抓取互联网数据",
+                "/predict_agent/2/1",
+                param21
+            );
+            console.log(task1Result, "task1Result");
+            // {
+            //   "type": "the number of the type",
+            //   "mark_number": "number of data"
+            // }
+            const { type, mark_number } = task1Result.data;
+            if (type < 4) {
+                //3 Appendix I
+                const param3 = {
+                    model,
+                    query: inputValue,
+                    type,
+                };
+                const task3Result = await taskFun(
+                    "3 Appendix I",
+                    "/predict_agent/3",
+                    param3
+                );
+                // if (task3Result.data.mark_number >= mark_number) {
+                //   return "Based on current status, this market will be resolved to `Yes`.";
+                // } else {
+                //   return "Based on current status, this market will be resolved to `No`.";
+                // }
+                const taskStep = {
+                    title: "最后结果",
+                    jsonData: `Based on current status, this market will be resolved to ${task3Result.data >= safeConvert(mark_number) ? "Yes" : "No"
+                        }`,
+                };
+                console.log(task3Result.data, safeConvert(mark_number))
+                // 不执行后面的逻辑了
+                return {
+                    result: taskStep
+                }
+            }
+        }
+        //2.2 搜索相关新闻
+        const param22 = {
+            topic: inputValue,
+            model,
+        };
+        const task22Result = await taskFun(
+            "2.2 搜索相关新闻",
+            "/predict_agent/2/2",
+            param22
+        );
+        //2.3 事实判断
+        const param23 = {
+            topic: inputValue,
+            result: JSON.stringify(task22Result.data.result),
+            rules,
+            model,
+        };
+        // {
+        //   "answer":  "[Yes / No / No Result]",
+        //   "reason": "Explanation of how the judgment was made with reference to given information"
+        //   }
+        const task23Result = await taskFun(
+            "2.3 事实判断",
+            "/predict_agent/2/3",
+            param23
+        );
+        const { answer } = task23Result.data;
+        const taskStep = {
+            title: "最后结果",
+            jsonData: `Based on current status, this market will be resolved to ${answer}`,
+        };
+
+        return {
+            result: taskStep
+        }
+
+    } catch (error: any) {
         bot.sendMessage(chatId, error.toString())
             .then(() => {
                 console.log('Message sent successfully');
