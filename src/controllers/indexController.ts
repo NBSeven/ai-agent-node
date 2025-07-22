@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import { handleAddStep, handleAddStepL, handleAddStepLN, handleAddStepPre } from '../services/index';
+import { handleAddStep, handleAddStepL, handleAddStepLN, handleAddStepPre, handleAddStepPreAdvice } from '../services/index';
 
 
 export const t = async (ctx: Context) => {
@@ -28,6 +28,14 @@ export const pre = async (ctx: Context) => {
     const res = await handleAddStepPre(topic, rules);
     ctx.body = { message: res };
 };
+
+
+export const prea = async (ctx: Context) => {
+    const { topic }: any = ctx.request.body;
+    const res = await handleAddStepPreAdvice(topic);
+    ctx.body = { message: res };
+};
+
 
 
 export const getIndex = async (ctx: Context) => {

@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { getIndex, postIndex, t, l, ln, pre } from '../controllers/indexController';
+import { getIndex, postIndex, t, l, ln, pre, prea } from '../controllers/indexController';
 
 const router = new Router();
 
@@ -10,6 +10,7 @@ router.post('/twitter', t);
 router.post('/ltwitter', l);
 router.post('/longtwitter', ln);
 router.post('/predict', pre);
+router.post('/predictAdvice', prea);
 
 
 export default router;
