@@ -1993,15 +1993,20 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
     }
 };
 
-export const handleAddStepT = async (inputValue: any) => {
-    if (!inputValue) {
-        alert("请输入json");
+export const handleAddStepT = async (title: any, rules: any, EndDate: any) => {
+    if (!title) {
+        alert("请输入title");
+        return;
+    }
+    if (!rules) {
+        alert("请输入rules");
+        return;
+    }
+    if (!EndDate) {
+        alert("请输入EndDate");
         return;
     }
     try {
-        const jsonData = inputValue;
-
-        const { rules, title, EndDate } = jsonData;
         const param1 = {
             topic: title,
             model,

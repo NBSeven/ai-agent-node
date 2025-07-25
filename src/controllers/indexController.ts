@@ -38,8 +38,8 @@ export const prea = async (ctx: Context) => {
 
 
 export const predict = async (ctx: Context) => {
-    const { data }: any = ctx.request.body;
-    const res = await handleAddStepT(data);
+    const { title, rules, EndDate }: any = ctx.request.body;
+    const res = await handleAddStepT(title, rules, EndDate);
     ctx.body = { message: res };
 };
 
