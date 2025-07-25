@@ -2057,10 +2057,10 @@ export const handleAddStepT = async (title: any, rules: any, EndDate: any) => {
             param2
         );
 
-        const { answer } = task2Result.data;
+        // const { answer } = task2Result.data;
         const taskStep = {
             title: "最后结果",
-            jsonData: `Based on current status, this market will be resolved to ${answer}`,
+            jsonData: `Based on current status, this market will be resolved to ${task2Result.data}`,
         };
         return {
             result: taskStep
