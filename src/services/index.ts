@@ -1999,7 +1999,8 @@ export const handleAddStepT = async (inputValue: string) => {
         return;
     }
     try {
-        const jsonData = JSON.parse(inputValue);
+        const jsonData = JSON.parse(JSON.stringify(inputValue));
+
         const { rules, title, EndDate } = jsonData;
         const param1 = {
             topic: title,
