@@ -1993,5 +1993,76 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
     }
 };
 
+export const handleAddStepT = async (inputValue: string) => {
+    if (!inputValue) {
+        alert("请输入json");
+        return;
+    }
+    try {
+        const jsonData = JSON.parse(inputValue);
+        const { rules, title, EndDate } = jsonData;
+        const param1 = {
+            topic: title,
+            model,
+        };
+        //1.1关键词、时间问题、信源问题生成
+        const task1Result = await taskFun(
+            "1.1关键词、时间问题、信源问题生成",
+            "/predict_agent3/1/1",
+            param1
+        );
 
+        const { date_question, source_question, keys1, keys2 } = task1Result.data;
+        let search1 = {
+            data: { results: [] },
+        };
+        let search2 = {
+            data: { results: [] },
+        };
+        if (keys1.length > 0) {
+            search1 = await tavilySearch("keys1搜索", JSON.stringify(keys1));
+        }
+        if (keys2.length > 0) {
+            search2 = await tavilySearch("keys2搜索", JSON.stringify(keys2));
+        }
+        const searchDate: any = await tavilySearch(
+            "1.3date_question搜索",
+            JSON.stringify(date_question)
+        );
 
+        const searchSource: any = await tavilySearch(
+            "1.4source_question搜索",
+            JSON.stringify(source_question)
+        );
+
+        const param2 = {
+            topic: title,
+            model,
+            end_date: EndDate,
+            result12: JSON.stringify([search1.data.results, search2.data.results]),
+            result13: JSON.stringify(searchDate.data.results),
+            result14: JSON.stringify(searchSource.data.results),
+            rules: JSON.stringify(rules),
+        };
+        //2.1 事实判断
+        const task2Result = await taskFun(
+            "2.1 事实判断",
+            "/predict_agent3/2/1",
+            param2
+        );
+
+        const { answer } = task2Result.data;
+        const taskStep = {
+            title: "最后结果",
+            jsonData: `Based on current status, this market will be resolved to ${answer}`,
+        };
+        return {
+            result: taskStep
+        }
+
+    } catch (error: any) {
+        return {
+            error: error.toString()
+        }
+    }
+};

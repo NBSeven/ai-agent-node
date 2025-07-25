@@ -1,6 +1,6 @@
 import { Context } from 'koa';
 
-import { handleAddStep, handleAddStepL, handleAddStepLN, handleAddStepPre, handleAddStepPreAdvice } from '../services/index';
+import { handleAddStep, handleAddStepL, handleAddStepLN, handleAddStepPre, handleAddStepPreAdvice, handleAddStepT } from '../services/index';
 
 
 export const t = async (ctx: Context) => {
@@ -37,6 +37,11 @@ export const prea = async (ctx: Context) => {
 };
 
 
+export const predict = async (ctx: Context) => {
+    const { data }: any = ctx.request.body;
+    const res = await handleAddStepT(data);
+    ctx.body = { message: res };
+};
 
 export const getIndex = async (ctx: Context) => {
     ctx.body = 'Hello, this is a GET request!';
