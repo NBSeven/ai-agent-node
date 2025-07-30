@@ -1861,49 +1861,9 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
         return "请输入topic";
     }
     try {
-
         const param1 = {
             text: inputValue,
         };
-        //1. 深度搜索
-        const task1Result = await taskFun(
-            "1.判断是否为相关",
-            "/predict_advice/1",
-            param1
-        );
-        // const { answer } = task1Result.data;
-        console.log(task1Result.data);
-
-        const { prediction_related } = task1Result.data;
-        if (prediction_related === "false" || prediction_related === false) {
-            //2.1搜索背景信息
-            const backres: any = await tavilySearch(
-                "2.1搜索背景信息",
-                JSON.stringify(inputValue)
-            );
-            //2.2 简单回复
-            const param21 = {
-                text: inputValue,
-                model,
-                search: JSON.stringify(backres.data.results),
-            };
-
-            const task21Result = await taskFun(
-                "2.2 简单回复",
-                "/predict_advice/2/2",
-                param21
-            );
-            console.log(task21Result, "task21Result");
-            const taskStep = {
-                title: "2.2 简单回复结果",
-                jsonData: `${task21Result.data.response}`,
-            };
-
-            return {
-                result: taskStep
-            }
-        }
-
         const task31Result = await taskFun(
             "3.1问题分析",
             "/predict_advice/3/1",
@@ -1961,7 +1921,6 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
             param33
         );
         console.log(task33Result.data);
-        debugger;
         //4回复
         const param4 = {
             model,
@@ -1978,7 +1937,6 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
         return {
             result: taskStep
         }
-        return;
     } catch (error: any) {
         bot.sendMessage(chatId, error.toString())
             .then(() => {
@@ -1992,6 +1950,50 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
         }
     }
 };
+
+export const handleAddStepFirst = async (inputValue: string) => {
+    if (!inputValue) {
+        return "请输入topic";
+    }
+    try {
+
+        const param1 = {
+            text: inputValue,
+        };
+        //1. 深度搜索
+        const task1Result = await taskFun(
+            "1.判断是否为相关",
+            "/predict_advice/1",
+            param1
+        );
+        // const { answer } = task1Result.data;
+        console.log(task1Result.data);
+
+        const { prediction_related } = task1Result.data;
+        if (prediction_related === "false" || prediction_related === false) {
+            return {
+                result: false
+            }
+        } else {
+            return {
+                result: true
+            }
+        }
+
+    } catch (error: any) {
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error: any) => {
+                console.error('Error sending message:', error);
+            });
+        return {
+            error: error.toString()
+        }
+    }
+};
+
 
 export const handleAddStepT = async (title: any, rules: any, EndDate: any) => {
     if (!title) {
