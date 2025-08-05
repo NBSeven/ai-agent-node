@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { getIndex, postIndex, t, l, ln, pre, prea, predict, preaf,image } from '../controllers/indexController';
+import { getIndex, postIndex, t, l, ln, pre, prea, predict, preaf, image } from '../controllers/indexController';
 
 const router = new Router();
 
@@ -14,6 +14,6 @@ router.post('/predictAdvice', prea);
 
 router.post('/predictAdviceFirst', preaf);
 router.post('/predictTask', predict);
-router.post('/image', predict);
+router.post('/image', image);
 
 export default router;
