@@ -2074,3 +2074,75 @@ export const handleAddStepT = async (title: any, rules: any, EndDate: any) => {
         }
     }
 };
+
+export const handleAddStepImage = async (inputValue: string) => {
+    if (!inputValue) {
+        return "请输入topic";
+    }
+    try {
+        const param1 = {
+            topic: inputValue,
+            model,
+        };
+        // 判断是否需要依赖搜索
+        const task1Result = await taskFun(
+            "1. 判断是否需要依赖搜索",
+            "/icon_prompt/1",
+            param1
+        );
+        const { core_entity, has_visual_knowledge } = task1Result.data;
+        if (has_visual_knowledge === "false" || has_visual_knowledge === false) {
+            //1.1 事实判断
+            const param2 = {
+                core_entity,
+                model,
+            };
+            const task11Result = await taskFun(
+                "1.1搜索相关网站获取图片（可选)",
+                "/icon_prompt/1/1",
+                param2
+            );
+            console.log(task11Result);
+
+            const param22 = {
+                image: task11Result.data,
+                topic: inputValue,
+            };
+            //2.2 根据话题和参考图片生成对应 logo 图片
+            const task22Result = await taskFun(
+                "2.2根据话题和参考图片生成对应 logo 图片",
+                "/icon_prompt/2/2",
+                param22
+            );
+            console.log(task22Result);
+
+            return {
+                result: task22Result.data
+            }
+        } else {
+            //2.1 根据话题生成对应 logo 图片A
+            const task21Result = await taskFun(
+                "2.1根据话题生成对应 logo 图片A",
+                "/icon_prompt/2/1",
+                param1
+            );
+            return {
+                result: task21Result.data
+            }
+        }
+
+
+
+    } catch (error: any) {
+        bot.sendMessage(chatId, error.toString())
+            .then(() => {
+                console.log('Message sent successfully');
+            })
+            .catch((error: any) => {
+                console.error('Error sending message:', error);
+            });
+        return {
+            error: error.toString()
+        }
+    }
+}
