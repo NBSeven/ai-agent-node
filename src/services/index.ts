@@ -52,18 +52,12 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
         const data = await response.json();
         // 如果startTask返回的taskid不存在就上报
         if (!data.task_id) {
-            console.log(chatId, path, 'taskid不存在')
-            console.log(chatId, JSON.stringify(taskPayload))
-            console.log(chatId, JSON.stringify(data))
+            console.log('startTask函数!data.task_id', chatId, path, 'taskid不存在', JSON.stringify(taskPayload), JSON.stringify(data))
         }
         return data.task_id; // 假设任务 ID 存在于 data.taskId
     } catch (error: any) {
         console.log(error)
-        console.log(path, JSON.stringify(taskPayload))
-        console.log(chatId, path)
-        console.log(chatId, error.toString())
-        console.log(chatId, JSON.stringify(taskPayload))
-
+        console.log('startTask函数error', path, JSON.stringify(taskPayload), chatId)
         throw new Error(`startTask: ${error.toString()},${taskPayload}`);
     }
 
@@ -119,8 +113,7 @@ async function waitForTaskCompletion(
                             res: statusResponse,
                         }; // 任务成功，返回结果
                     } catch (error) {
-                        console.log(fixJsonString(statusResponse.data));
-                        console.log(error)
+                        console.log('JSON.parse失败', error, fixJsonString(statusResponse.data));
                         return error;
                     }
                 } else {
