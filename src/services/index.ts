@@ -52,17 +52,17 @@ async function startTask(path: string, taskPayload: any): Promise<string> {
         const data = await response.json();
         // 如果startTask返回的taskid不存在就上报
         if (!data.task_id) {
-            bot.sendMessage(chatId, path)
-            bot.sendMessage(chatId, JSON.stringify(taskPayload))
-            bot.sendMessage(chatId, JSON.stringify(data))
+            console.log(chatId, path, 'taskid不存在')
+            console.log(chatId, JSON.stringify(taskPayload))
+            console.log(chatId, JSON.stringify(data))
         }
         return data.task_id; // 假设任务 ID 存在于 data.taskId
     } catch (error: any) {
         console.log(error)
         console.log(path, JSON.stringify(taskPayload))
-        bot.sendMessage(chatId, path)
-        bot.sendMessage(chatId, error.toString())
-        bot.sendMessage(chatId, JSON.stringify(taskPayload))
+        console.log(chatId, path)
+        console.log(chatId, error.toString())
+        console.log(chatId, JSON.stringify(taskPayload))
 
         throw new Error(`startTask: ${error.toString()},${taskPayload}`);
     }
@@ -911,15 +911,7 @@ export const handleAddStep = async (inputValue: string, type = 1, username = '')
 
         }
     } catch (error: any) {
-
-        console.error(error);
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
@@ -1207,15 +1199,7 @@ export const handleAddStepL = async (inputValue: string, type = 1) => {
             }
         }
     } catch (error: any) {
-        console.error(error);
-
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
@@ -1240,7 +1224,6 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
     const furls = urls.filter((url) =>
         url.includes("https://polymarket.com/event")
     );
-    console.log(furls, 'furlsfurlsfurlsfurls')
     if (furls.length > 0) {
         includeUrl = true;
         purl = furls[0]; //只获取一个
@@ -1775,15 +1758,7 @@ export const handleAddStepLN = async (inputValue: string, username = '') => {
             result: task46Step
         }
     } catch (error: any) {
-        console.log(error, 'error')
-
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
@@ -1842,13 +1817,7 @@ export const handleAddStepPre = async (inputValue: string, rules = '') => {
             result: taskStep
         }
     } catch (error: any) {
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
@@ -1938,13 +1907,7 @@ export const handleAddStepPreAdvice = async (inputValue: string) => {
             result: taskStep
         }
     } catch (error: any) {
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
@@ -1981,13 +1944,7 @@ export const handleAddStepFirst = async (inputValue: string) => {
         }
 
     } catch (error: any) {
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
@@ -2131,16 +2088,8 @@ export const handleAddStepImage = async (inputValue: string) => {
             }
         }
 
-
-
     } catch (error: any) {
-        bot.sendMessage(chatId, error.toString())
-            .then(() => {
-                console.log('Message sent successfully');
-            })
-            .catch((error: any) => {
-                console.error('Error sending message:', error);
-            });
+        console.log(chatId, error.toString())
         return {
             error: error.toString()
         }
